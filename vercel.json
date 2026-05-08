@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/jeom_ide.html"
+    }
+  ]
+}
