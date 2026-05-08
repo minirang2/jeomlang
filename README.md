@@ -28,19 +28,15 @@ jeom_lang/
 ├── jeom_ide.html        ← 브라우저 웹 IDE (독립 실행)
 ├── jeom_ide.css         ← IDE 스타일시트
 ├── jeom_ide.js          ← IDE 로직
-├── jeom/                ← Python 엔진 패키지
-│   ├── __init__.py
-│   ├── lexer.py
-│   ├── parser.py
-│   └── interpreter.py
 ├── stdlib/
 │   └── std.jeom         ← 표준 라이브러리
 ├── examples/
 │   ├── hello.jeom
 │   ├── fizzbuzz.jeom
 │   └── factorial.jeom
-├── logo.svg
-├── logo_animated.svg
+├── img/
+│   ├── logo.svg
+│   └── logo_animated.svg
 ├── SPEC.md              ← 언어 명세서
 └── README.md
 ```
@@ -399,11 +395,6 @@ jeom_cli.js     Node.js CLI
 jeom_ide.html   웹 IDE (jeom_engine.js 인라인)
 jeom_ide.css    웹 IDE 스타일
 jeom_ide.js     웹 IDE 로직
-
-jeom/           Python 엔진 (동일 스펙)
-├── lexer.py
-├── parser.py
-└── interpreter.py
 ```
 
 ---
