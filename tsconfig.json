@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "allowJs": true,           // JS 파일도 허용
+    "checkJs": false,          // JS 에러 체크 안 함
+    "strict": false,           // 엄격 모드 끄기 (핵심!)
+    "noImplicitAny": false,    // 타입 없어도 통과
+    "skipLibCheck": true,      // 외부 라이브러리 검사 패스
+    "outDir": "./dist",        // 결과물은 dist 폴더로!
+    "esModuleInterop": true
+  },
+  "include": ["."],            // 현재 폴더의 모든 파일 대상
+  "exclude": ["node_modules"]
+}
