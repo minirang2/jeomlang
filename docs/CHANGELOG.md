@@ -1,3 +1,12 @@
+## v1.2.1 - 2026-05-10
+
+## Updates
+
+- Migrated the IDE script language from JavaScript to TypeScript.
+- Fixed miner bugs.
+
+---
+
 ## v1.1.1 - 2026-05-10
 
 ## Updates
