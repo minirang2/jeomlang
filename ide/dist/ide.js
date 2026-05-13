@@ -1,5 +1,5 @@
 "use strict";
-/* jeom_ide.ts — 점(Jeom) 웹 IDE 로직 */
+/* ide.js — 점(Jeom) 웹 IDE 로직 */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12,7 +12,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 (function () {
     'use strict';
     const { encodeString, encodeNumber, encodeFloat, decodeString, decodeNumber, tokenize, parse, JeomVM, JeomError, JeomExit, OP_TABLE } = JeomEngine;
-    // ── 예제 코드 (빌드 시 jeom_engine.js로 생성) ───────────────────────────
+    // ── 예제 코드 (빌드 시 engine.js로 생성) ───────────────────────────
     // encodeString / encodeNumber 을 여기서 직접 호출해 런타임에 생성
     function makeExamples() {
         const S = encodeString, N = encodeNumber;

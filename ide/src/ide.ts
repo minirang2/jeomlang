@@ -1,7 +1,7 @@
-/* jeom_ide.ts — 점(Jeom) 웹 IDE 로직 */
+/* ide.ts — 점(Jeom) 웹 IDE 로직 */
 
 /** 
- * 외부 jeom_engine.js에서 제공하는 객체 타입 정의 
+ * 외부 engine.js에서 제공하는 객체 타입 정의 
  */
 interface JeomEngineType {
   encodeString: (s: string) => string;
