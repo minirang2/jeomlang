@@ -180,6 +180,24 @@
     return C.NUM_DELIM + Math.abs(n).toString(2).replace(/0/g,C.ZERO).replace(/1/g,C.ONE) + C.NUM_DELIM;
   }
 
+  function encodeFloat(n) {
+    if (!isFinite(n)) throw new JeomError('encodeFloat: 유한수만 지원합니다');
+    var neg = n < 0; n = Math.abs(n);
+    var intPart = Math.floor(n);
+    var fracPart = n - intPart;
+    var intBits = intPart === 0 ? [] : intPart.toString(2).split('').map(Number);
+    var fracBits = [];
+    var f = fracPart;
+    for (var i = 0; i < 24; i++) {
+      f *= 2;
+      fracBits.push(Math.floor(f));
+      f -= Math.floor(f);
+      if (f === 0) break;
+    }
+    var b2d = function(arr){ return arr.map(function(x){return x?C.ONE:C.ZERO;}).join(''); };
+    return C.NUM_DELIM + b2d(intBits) + C.FLOAT_SEP + b2d(fracBits) + C.NUM_DELIM;
+  }
+
   function decodeString(s) {
     s = (s||'').trim();
     if (!s.startsWith(C.STR_DELIM)||!s.endsWith(C.STR_DELIM)) return null;
@@ -198,7 +216,17 @@
     if (!s.startsWith(C.NUM_DELIM)||!s.endsWith(C.NUM_DELIM)) return null;
     var inner = s.slice(1,-1);
     if (!inner) return 0;
-    return parseInt(inner.replace(/\./g,'0').replace(/·/g,'1'),2);
+    var fpIdx = inner.indexOf(C.FLOAT_SEP);
+    if (fpIdx === -1) {
+      return parseInt(inner.replace(/\./g,'0').replace(/·/g,'1'),2);
+    }
+    var intStr  = inner.slice(0, fpIdx);
+    var fracStr = inner.slice(fpIdx + 1);
+    var intVal  = intStr  ? parseInt(intStr.replace(/\./g,'0').replace(/·/g,'1'),2) : 0;
+    var fracVal = fracStr ? fracStr.split('').reduce(function(acc,b,i){
+      return acc + (b===C.ONE?1:0) * Math.pow(2,-(i+1));
+    },0) : 0;
+    return intVal + fracVal;
   }
 
   // ══════════════════════════════════════════════════════════════
@@ -845,7 +873,7 @@
 
   return {
     VERSION:VERSION,
-    encodeString:encodeString, encodeNumber:encodeNumber,
+    encodeString:encodeString, encodeNumber:encodeNumber, encodeFloat:encodeFloat,
     decodeString:decodeString, decodeNumber:decodeNumber,
     tokenize:tokenize, parse:parse,
     JeomVM:JeomVM,

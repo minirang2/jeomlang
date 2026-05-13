@@ -13,7 +13,7 @@
 <body>
     <header>
         <div class="logo">
-            <img src="img/logo.svg" alt="Jeom" title="점(Jeom) Language" />
+            <img src="/img/logo.svg" alt="Jeom" title="점(Jeom) Language" />
             <div>
                 <div class="logo-text">점 · JEOM</div>
                 <div class="logo-sub">Dot Language IDE</div>
@@ -113,6 +113,14 @@
                             </div>
                         </div>
                         <div class="enc-box">
+                            <div class="enc-lbl">• 소수 → 점 인코딩</div>
+                            <input class="enc-in" id="fEncIn" type="number" step="any" placeholder="소수 (예: 3.14)"
+                                oninput="encFloat()" />
+                            <div class="enc-res" id="fEncOut" onclick="insertEnc('f')" title="클릭 → 에디터 삽입">
+                                <span style="color: var(--text3)">결과</span>
+                            </div>
+                        </div>
+                        <div class="enc-box">
                             <div class="enc-lbl">⸳ 디코더</div>
                             <input class="enc-in" id="decIn" placeholder="● ... ● 또는 • ... • 붙여넣기"
                                 oninput="doDecode()" />
@@ -140,7 +148,7 @@
     </div>
     <div class="toast" id="toast"></div>
 
-    <script src="jeom_engine.js"></script>
+    <script src="/jeom_engine.js"></script>
     <script src="/ide/dist/ide.js"></script>
 </body>
 

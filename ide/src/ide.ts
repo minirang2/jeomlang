@@ -6,6 +6,7 @@
 interface JeomEngineType {
   encodeString: (s: string) => string;
   encodeNumber: (n: number) => string;
+  encodeFloat: (n: number) => string;
   decodeString: (s: string) => string | null;
   decodeNumber: (s: string) => number | null;
   tokenize: (code: string) => any[];
@@ -31,15 +32,16 @@ interface Window {
   switchTab: (name: string) => void;
   encStr: () => void;
   encNum: () => void;
+  encFloat: () => void;
   doDecode: () => void;
-  insertEnc: (type: 's' | 'n') => void;
+  insertEnc: (type: 's' | 'n' | 'f') => void;
   loadEx: (name: string) => void;
 }
 
 (function () {
   'use strict';
 
-  const { encodeString, encodeNumber, decodeString, decodeNumber,
+  const { encodeString, encodeNumber, encodeFloat, decodeString, decodeNumber,
           tokenize, parse, JeomVM, JeomError, JeomExit, OP_TABLE } = JeomEngine;
 
   // ── 예제 코드 (빌드 시 jeom_engine.js로 생성) ───────────────────────────
@@ -91,7 +93,7 @@ interface Window {
   const sTxt     = document.getElementById('sTxt') as HTMLSpanElement;
 
   let inputResolve: ((value: string) => void) | null = null;
-  let lastSEnc = '', lastNEnc = '';
+  let lastSEnc = '', lastNEnc = '', lastFEnc = '';
 
   // ── 상태 표시 ─────────────────────────────────────────────────────────────
   function setStatus(msg: string, type?: 'ok' | 'err' | 'run' | '준비') {
@@ -202,11 +204,11 @@ interface Window {
     const f = e.target.files[0];
     if (!f) return;
     const r = new FileReader();
-    r.onload = ev => { 
-        if(ev.target) {
-            editor.value = ev.target.result as string; 
-            updateLN(); 
-        }
+    r.onload = ev => {
+      if (ev.target) {
+        editor.value = ev.target.result as string;
+        updateLN();
+      }
     };
     r.readAsText(f, 'utf-8');
     (document.getElementById('filename') as HTMLInputElement).value = f.name;
@@ -276,6 +278,15 @@ interface Window {
   }
   window.encNum = encNum;
 
+  function encFloat() {
+    const v = parseFloat((document.getElementById('fEncIn') as HTMLInputElement).value);
+    const el = document.getElementById('fEncOut') as HTMLElement;
+    if (isNaN(v)) { el.innerHTML = '<span style="color:var(--text3)">결과</span>'; lastFEnc = ''; return; }
+    lastFEnc = encodeFloat(v);
+    el.textContent = lastFEnc;
+  }
+  window.encFloat = encFloat;
+
   function doDecode() {
     const v = (document.getElementById('decIn') as HTMLInputElement).value.trim();
     const el = document.getElementById('decOut') as HTMLElement;
@@ -292,8 +303,8 @@ interface Window {
   }
   window.doDecode = doDecode;
 
-  function insertEnc(type: 's' | 'n') {
-    const code = type === 's' ? lastSEnc : lastNEnc;
+  function insertEnc(type: 's' | 'n' | 'f') {
+    const code = type === 's' ? lastSEnc : type === 'f' ? lastFEnc : lastNEnc;
     if (!code) return;
     insertToken(code);
     toast('에디터에 삽입됨');

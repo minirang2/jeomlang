@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 (function () {
     'use strict';
-    const { encodeString, encodeNumber, decodeString, decodeNumber, tokenize, parse, JeomVM, JeomError, JeomExit, OP_TABLE } = JeomEngine;
+    const { encodeString, encodeNumber, encodeFloat, decodeString, decodeNumber, tokenize, parse, JeomVM, JeomError, JeomExit, OP_TABLE } = JeomEngine;
     // ── 예제 코드 (빌드 시 jeom_engine.js로 생성) ───────────────────────────
     // encodeString / encodeNumber 을 여기서 직접 호출해 런타임에 생성
     function makeExamples() {
@@ -51,7 +51,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     const sDot = document.getElementById('sDot');
     const sTxt = document.getElementById('sTxt');
     let inputResolve = null;
-    let lastSEnc = '', lastNEnc = '';
+    let lastSEnc = '', lastNEnc = '', lastFEnc = '';
     // ── 상태 표시 ─────────────────────────────────────────────────────────────
     function setStatus(msg, type) {
         sDot.className = 's-dot' + (type === 'ok' ? ' ok' : type === 'err' ? ' err' : type === 'run' ? ' run' : '');
@@ -240,6 +240,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         el.textContent = lastNEnc;
     }
     window.encNum = encNum;
+    function encFloat() {
+        const v = parseFloat(document.getElementById('fEncIn').value);
+        const el = document.getElementById('fEncOut');
+        if (isNaN(v)) {
+            el.innerHTML = '<span style="color:var(--text3)">결과</span>';
+            lastFEnc = '';
+            return;
+        }
+        lastFEnc = encodeFloat(v);
+        el.textContent = lastFEnc;
+    }
+    window.encFloat = encFloat;
     function doDecode() {
         const v = document.getElementById('decIn').value.trim();
         const el = document.getElementById('decOut');
@@ -258,7 +270,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     }
     window.doDecode = doDecode;
     function insertEnc(type) {
-        const code = type === 's' ? lastSEnc : lastNEnc;
+        const code = type === 's' ? lastSEnc : type === 'f' ? lastFEnc : lastNEnc;
         if (!code)
             return;
         insertToken(code);
