@@ -1,3 +1,12 @@
+## v1.3.1 - 2026-05-13
+
+## Updates
+
+- Fixed float type.
+- Fixed miner bugs.
+
+---
+
 ## v1.2.1 - 2026-05-10
 
 ## Updates
