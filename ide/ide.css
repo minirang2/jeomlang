@@ -519,7 +519,8 @@ header {
     line-height: 1.65;
     padding: 12px 14px;
     white-space: pre-wrap;
-    word-break: break-all;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .o-out {
