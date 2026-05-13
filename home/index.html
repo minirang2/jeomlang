@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@
         rel="stylesheet" />
     <link href="/home/style.css" rel="stylesheet" />
 </head>
+
 <body>
     <!-- NAV -->
     <nav>
@@ -31,7 +33,7 @@
     <section class="hero">
         <div class="hero-badge">
             <span class="hero-badge-dot"></span>
-            v1.1.0 · Stack VM · 16 Dot Characters
+            <jeom-version></jeom-version> · Stack VM · 16 Dot Characters
         </div>
         <img src="/assets/img/logo_animated.svg" alt="Jeom" class="hero-logo" />
         <h1 class="hero-title">점<span>·</span>jeom</h1>
@@ -278,7 +280,7 @@
                     <div class="ide-bar-dot"></div>
                     <div class="ide-bar-dot"></div>
                     <span class="ide-title">점(Jeom) 웹 IDE</span>
-                    <span class="ide-badge">WebVM v1.1.0</span>
+                    <span class="ide-badge">WebVM <jeom-version></jeom-version></span>
                 </div>
                 <div class="ide-body">
                     <div>
@@ -373,7 +375,7 @@
                     </p>
                     <div class="dl-meta">
                         <span class="dl-tag">UMD</span>
-                        <span class="dl-tag">v1.1.0</span>
+                        <span class="dl-tag"><jeom-version></jeom-version></span>
                         <span class="dl-tag">의존성 없음</span>
                     </div>
                     <a href="/core/engine.js" download class="dl-btn">⸳ engine.js</a>
@@ -415,11 +417,13 @@
                     </p>
                     <div class="dl-meta">
                         <span class="dl-tag">Markdown</span>
-                        <span class="dl-tag">v1.1.0</span>
+                        <span class="dl-tag"><joem-version></joem-version></span>
                     </div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap">
-                        <a href="https://github.com/minirang/jeomlang/blob/main/README.md" download class="dl-btn">README.md</a>
-                        <a href="https://github.com/minirang/jeomlang/blob/main/docs/SPEC.md" download class="dl-btn">SPEC.md</a>
+                        <a href="https://github.com/minirang/jeomlang/blob/main/README.md" download
+                            class="dl-btn">README.md</a>
+                        <a href="https://github.com/minirang/jeomlang/blob/main/docs/SPEC.md" download
+                            class="dl-btn">SPEC.md</a>
                     </div>
                 </div>
             </div>
@@ -980,7 +984,7 @@
     <!-- FOOTER -->
     <footer>
         <div class="footer-logo">점 · JEOM</div>
-        <div class="footer-sub">DOT LANGUAGE v1.1.0</div>
+        <div class="footer-sub">DOT LANGUAGE <jeom-version></jeom-version></div>
         <ul class="footer-links">
             <li><a href="/ide">웹 IDE</a></li>
             <li><a href="https://github.com/minirang/jeomlang/blob/main/README.md" download>README</a></li>
@@ -990,6 +994,8 @@
         <div class="footer-copy">Apache License 2.0 · Jeomlang</div>
         <div class="footer-dots"><span></span><span></span><span></span><span></span><span></span></div>
     </footer>
-<script src="/home/index.js"></script>
+    <script src="/home/index.js"></script>
+    <script src="/customTag.js"></script>
 </body>
+
 </html>
