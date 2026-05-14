@@ -1065,30 +1065,9 @@ footer {
     overflow: hidden;
 }
 
-.ide-code {
-    white-space: pre !important;
-    word-break: normal !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-}
-
-.ide-code span,
-.ide-code jeom-version {
-    display: inline-block !important;
-    vertical-align: baseline !important;
-    line-height: inherit;
-}
-
-.ide-body .ide-code {
-    align-items: flex-start;
-}
-
 jeom-version {
-    display: inline-block !important;
-    vertical-align: baseline !important;
-    font-family: var(--mono);
-    font-size: inherit;
-    line-height: inherit;
+    display: inline;
+    white-space: nowrap;
 }
 
 @keyframes dotPulse {
