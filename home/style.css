@@ -1025,7 +1025,7 @@ footer {
 
 .hero-code,
 .ide-preview {
-    overflow: hidden;
+    overflow: visible;
 }
 
 .code-body {
@@ -1033,7 +1033,9 @@ footer {
     flex-direction: column;
     gap: 6px;
     white-space: pre !important;
-    overflow: hidden !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-height: 180px;
     line-height: 1.8;
 }
 
@@ -1048,6 +1050,8 @@ footer {
 
 .ide-code {
     white-space: pre-wrap !important;
+    overflow: auto;
+    max-height: 260px;
     overflow-wrap: anywhere;
     line-height: 1.9;
     font-size: 0;
@@ -1072,6 +1076,35 @@ footer {
 
 .ide-body {
     overflow: hidden;
+}
+
+/* Custom scrollbars (WebKit + Firefox) for code blocks */
+.code-body::-webkit-scrollbar,
+.ide-code::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+.code-body::-webkit-scrollbar-track,
+.ide-code::-webkit-scrollbar-track {
+    background: transparent;
+}
+.code-body::-webkit-scrollbar-thumb,
+.ide-code::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #00e5ff33, #00a3ff33);
+    border-radius: 999px;
+    border: 2px solid rgba(0,0,0,0);
+    background-clip: padding-box;
+}
+.code-body::-webkit-scrollbar-thumb:hover,
+.ide-code::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #00e5ff66, #00a3ff66);
+}
+
+/* Firefox */
+.code-body,
+.ide-code {
+    scrollbar-width: thin;
+    scrollbar-color: #00e5ff66 transparent;
 }
 
 jeom-version {
