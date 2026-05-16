@@ -1032,12 +1032,9 @@ footer {
     display: flex;
     flex-direction: column;
     gap: 6px;
-
-    white-space: normal !important;
+    white-space: pre !important;
     overflow: hidden !important;
-
     line-height: 1.8;
-    word-break: break-all;
 }
 
 .code-body span {
@@ -1050,15 +1047,27 @@ footer {
 }
 
 .ide-code {
-    white-space: normal !important;
-    overflow: hidden !important;
-
-    word-break: break-all;
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere;
     line-height: 1.9;
+    font-size: 0;
 }
 
 .ide-code span {
     display: inline;
+    font-size: 12.5px;
+}
+
+.c-border {
+    color: var(--border);
+}
+
+.c-var {
+    color: #6b8fa8;
+}
+
+.out-success {
+    color: #39ff1488;
 }
 
 .ide-body {
