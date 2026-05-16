@@ -13,6 +13,7 @@
         href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@300;400;700&family=Space+Grotesk:wght@300;400;600;700&display=swap"
         rel="stylesheet" />
     <link href="/home/style.css" rel="stylesheet" />
+    <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -52,7 +53,7 @@
             <a href="/ide" class="btn-primary">● 웹 IDE 바로가기</a>
             <a href="#download" class="btn-secondary">⸳ 다운로드</a>
         </div>
-        <div class="hero-code">
+        <div class="hero-code" data-aos="fade-up" data-aos-delay="300">
             <div class="code-header">
                 <div class="code-dot"></div>
                 <div class="code-dot"></div>
@@ -62,8 +63,8 @@
             <div class="code-body">
                 <span class="c-comment">◘ Hello, Jeom! — 점 언어로 Hello World</span>
                 <span class="c-kw">•·</span>
-                <span class="c-str">  ●.·......·‧.·.....·‧··..··.·‧··..··.·‧···..··●</span>
-                <span class="c-op">  ··</span>
+                <span class="c-str"> ●.·......·‧.·.....·‧··..··.·‧··..··.·‧···..··●</span>
+                <span class="c-op"> ··</span>
                 <span class="c-kw">⋮⋮</span>
             </div>
         </div>
@@ -75,7 +76,7 @@
             <h2 class="section-title">난해하지만 강력하게</h2>
             <p class="section-desc">점 16개로 시작해서, 실제로 동작하는 프로그램을 만들 수 있습니다.</p>
             <div class="features-grid">
-                <div class="feature-card">
+                <div class="feature-card" data-aos="fade-up">
                     <span class="feature-icon">●</span>
                     <h3 class="feature-title">점만 사용</h3>
                     <p class="feature-desc">
@@ -89,21 +90,21 @@
                         스택 기반 가상 머신 위에서 동작합니다. 모든 연산은 스택에서 팝/푸시로 처리됩니다.
                     </p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card" data-aos="fade-up">
                     <span class="feature-icon">˙</span>
                     <h3 class="feature-title">함수 & 재귀</h3>
                     <p class="feature-desc">
                         함수 정의, 호출, 재귀, 람다, 커링을 완전히 지원합니다. 클로저도 동작합니다.
                     </p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card" data-aos="fade-up">
                     <span class="feature-icon">◦</span>
                     <h3 class="feature-title">배열 & 딕셔너리</h3>
                     <p class="feature-desc">
                         동적 배열과 해시맵을 지원합니다. map, filter, reduce 고차 함수도 사용 가능합니다.
                     </p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card" data-aos="fade-up">
                     <span class="feature-icon">‥·</span>
                     <h3 class="feature-title">오류 처리</h3>
                     <p class="feature-desc">
@@ -111,21 +112,21 @@
                         있습니다.
                     </p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card" data-aos="fade-up">
                     <span class="feature-icon">⋯</span>
                     <h3 class="feature-title">모듈 & 파일시스템</h3>
                     <p class="feature-desc">
                         다른 .jeom 파일을 임포트할 수 있습니다. 파일 읽기/쓰기, 디렉터리 조작도 지원합니다.
                     </p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card" data-aos="fade-up">
                     <span class="feature-icon">⋮⋮</span>
                     <h3 class="feature-title">JS 엔진</h3>
                     <p class="feature-desc">
                         공용 JS 엔진(UMD)이 브라우저와 Node.js 양쪽에서 동작합니다.
                     </p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card" data-aos="fade-up">
                     <span class="feature-icon">•</span>
                     <h3 class="feature-title">웹 IDE 내장</h3>
                     <p class="feature-desc">
@@ -146,7 +147,7 @@
                 인코딩됩니다.
             </p>
             <div class="chars-grid">
-                <div class="char-card">
+                <div class="char-card" data-aos="zoom-in" data-aos-duration="600">
                     <span class="char-sym">.</span>
                     <div class="char-info">
                         <div class="char-unicode">U+002E</div>
@@ -276,7 +277,7 @@
             <p class="section-desc">
                 서버 없이 파일만 열면 됩니다. 인코더, 디코더, 명령 참조, 8가지 예제가 내장되어 있습니다.
             </p>
-            <div class="ide-preview">
+            <div class="ide-preview" data-aos="fade-up" data-aos-duration="1000">
                 <div class="ide-bar">
                     <div class="ide-bar-dot"></div>
                     <div class="ide-bar-dot"></div>
@@ -292,21 +293,21 @@
                             <span class="c-kw">˙ ·∘·</span>
                             <span class="c-kw">˙∘ ·</span>
                             <span class="c-border">⋮</span>
-                            <span class="c-var">  ∘∘ · </span><span class="c-num">•·•</span>
-                            <span class="c-op">  ⋅‧∘∘</span>
-                            <span class="c-kw">  …</span>
-                            <span class="c-border">    ⋮</span>
-                            <span class="c-num">      •·•</span>
-                            <span class="c-kw">      ˙˙</span>
-                            <span class="c-border">    ⋮⋮</span>
-                            <span class="c-var">    ∘∘ · ∘∘ · </span><span class="c-num">•·•</span>
-                            <span class="c-op">    ⋅⋅</span>
-                            <span class="c-kw">    ˙˙˙ ·∘· ⋅⋅⋅ ˙˙</span>
-                            <span class="c-border">  ⋮⋮</span>
+                            <span class="c-var"> ∘∘ · </span><span class="c-num">•·•</span>
+                            <span class="c-op"> ⋅‧∘∘</span>
+                            <span class="c-kw"> …</span>
+                            <span class="c-border"> ⋮</span>
+                            <span class="c-num"> •·•</span>
+                            <span class="c-kw"> ˙˙</span>
+                            <span class="c-border"> ⋮⋮</span>
+                            <span class="c-var"> ∘∘ · ∘∘ · </span><span class="c-num">•·•</span>
+                            <span class="c-op"> ⋅⋅</span>
+                            <span class="c-kw"> ˙˙˙ ·∘· ⋅⋅⋅ ˙˙</span>
+                            <span class="c-border"> ⋮⋮</span>
                             <span class="c-kw">•·</span>
-                            <span class="c-num">  •·.·•</span>
-                            <span class="c-kw">  ˙˙˙ ·∘·</span>
-                            <span class="c-op">  ··</span>
+                            <span class="c-num"> •·.·•</span>
+                            <span class="c-kw"> ˙˙˙ ·∘·</span>
+                            <span class="c-op"> ··</span>
                             <span class="c-kw">⋮⋮</span>
                         </div>
                     </div>
@@ -333,7 +334,7 @@
             <h2 class="section-title">파일 다운로드</h2>
             <p class="section-desc">필요한 파일만 골라 사용하세요. 모든 파일은 무료입니다.</p>
             <div class="download-grid">
-                <div class="dl-card html">
+                <div class="dl-card html" data-aos="fade-up">
                     <div class="dl-icon">● ⋮</div>
                     <h3 class="dl-title">웹 IDE</h3>
                     <p class="dl-desc">
@@ -371,7 +372,7 @@
                     </div>
                     <a href="/core/cli.js" download class="dl-btn">⸳ cli.js</a>
                 </div>
-                <div class="dl-card js">
+                <div class="dl-card js" data-aos="fade-up" data-aos-delay="200">
                     <div class="dl-icon">•· ⋮</div>
                     <h3 class="dl-title">공용 엔진</h3>
                     <p class="dl-desc">
@@ -1000,6 +1001,14 @@
     </footer>
     <script src="/home/index.js"></script>
     <script src="/shared/custom-elements.js"></script>
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800,
+            offset: 100,
+            once: false
+        });
+    </script>
 </body>
 
 </html>
