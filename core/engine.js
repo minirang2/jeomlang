@@ -42,6 +42,10 @@
     SPACE:     new Set([' ','\t','\n','\r','\f','\v']),
   };
 
+  function formatError(msg, line, col) {
+    return col !== undefined ? ('Line '+line+', Column '+col+': '+msg) : ('Line '+line+': '+msg);
+  }
+
   // ══════════════════════════════════════════════════════════════
   // §2  OP_TABLE
   // ══════════════════════════════════════════════════════════════
@@ -260,11 +264,11 @@
         else if(ch===C.ZERO){bits.push(0);raw+=adv();}
         else if(ch===C.ONE){bits.push(1);raw+=adv();}
         else if(ch===C.FLOAT_SEP){
-          if(fpIdx!==null) throw new JeomError('L'+sl+': 소수점 중복');
+          if(fpIdx!==null) throw new JeomError(formatError('소수점 중복', sl));
           fpIdx=bits.length; raw+=adv();
         }
-        else if(C.SPACE.has(ch)) throw new JeomError('L'+sl+': 숫자 내 공백 불가');
-        else throw new JeomError('L'+sl+':C'+col+': 숫자 내 허용안되는 문자 \''+ch+'\'');
+        else if(C.SPACE.has(ch)) throw new JeomError(formatError('숫자 내 공백 불가', sl));
+        else throw new JeomError(formatError('숫자 내 허용안되는 문자 \''+ch+'\'', sl, sc));
       }
       if(!bits.length) return {type:'NUMBER',value:0,raw:raw,line:sl,col:sc};
       if(fpIdx!==null){
@@ -285,15 +289,15 @@
         else if(ch===C.BYTE_SEP){
           raw+=adv();
           if(cur.length){
-            if(cur.length!==8) throw new JeomError('L'+sl+': 문자열 바이트가 8비트가 아님('+cur.length+')');
+            if(cur.length!==8) throw new JeomError(formatError('문자열 바이트가 8비트가 아님('+cur.length+')', sl));
             bytes.push(parseInt(cur.join(''),2)); cur=[];
           }
         }
         else if(C.SPACE.has(ch)){adv();}
-        else throw new JeomError('L'+sl+':C'+col+': 문자열 내 허용안되는 문자 \''+ch+'\'');
+        else throw new JeomError(formatError('문자열 내 허용안되는 문자 \''+ch+'\'', sl, sc));
       }
       if(cur.length===8) bytes.push(parseInt(cur.join(''),2));
-      else if(cur.length>0) throw new JeomError('L'+sl+': 마지막 바이트가 8비트 아님('+cur.length+')');
+      else if(cur.length>0) throw new JeomError(formatError('마지막 바이트가 8비트 아님('+cur.length+')', sl));
       var value=(typeof TextDecoder!=='undefined')
         ? new TextDecoder().decode(new Uint8Array(bytes))
         : Buffer.from(bytes).toString('utf8');
@@ -305,9 +309,7 @@
       if(pos>=source.length) break;
       var ch=source[pos], sl=line, sc=col;
       if(!DOT_CHARS.has(ch))
-        throw new JeomError('L'+sl+':C'+sc+': 허용안되는 문자 \''+ch+'\' (U+'+ch.codePointAt(0).toString(16).toUpperCase().padStart(4,'0')+')');
-
-      if(ch===C.NUM_DELIM){
+        throw new JeomError(formatError('허용안되는 문자 \''+ch+'\' (U+'+ch.codePointAt(0).toString(16).toUpperCase().padStart(4,'0')+')', sl, sc));
         // MAIN marker: •· 다음이 공백/EOF/주석인 경우만
         var nx=peek(1), afx=peek(2);
         if(nx===C.ONE&&(!afx||C.SPACE.has(afx)||afx===C.COMMENT)){
@@ -325,7 +327,7 @@
         while(pos<source.length){
           var cc=source[pos];
           if(C.SPACE.has(cc)||cc===C.COMMENT) break;
-          if(!DOT_CHARS.has(cc)) throw new JeomError('L'+line+':C'+col+': 허용안되는 문자 \''+cc+'\'');
+          if(!DOT_CHARS.has(cc)) throw new JeomError(formatError('허용안되는 문자 \''+cc+'\'', line, col));
           raw+=adv();
         }
         if(raw) tokens.push({type:'OP',value:raw,raw:raw,line:sl,col:sc});
@@ -348,7 +350,7 @@
     function isEnd(){var o=opName(peek());return o==='END'||o==='ELSE'||o==='ELIF'||o==='CATCH'||o==='FINALLY';}
     function readName(){
       var t=adv();
-      if(t.type!=='OP') throw new JeomError('L'+t.line+': 이름 기대, 받음: '+t.type+'(\''+t.raw+'\')');
+      if(t.type!=='OP') throw new JeomError(formatError('이름 기대, 받음: '+t.type+'(\''+t.raw+'\')', t.line));
       return t.raw;
     }
     function parseBody(){
@@ -357,7 +359,7 @@
       return s;
     }
     function parseBlock(){
-      if(opName(peek())!=='BLOCK') throw new JeomError('L'+peek().line+': ⋮ 기대, 받음: \''+peek().raw+'\'');
+      if(opName(peek())!=='BLOCK') throw new JeomError(formatError('⋮ 기대, 받음: \''+peek().raw+'\'', peek().line));
       adv();
       var b=parseBody();
       if(opName(peek())==='END') adv();
@@ -370,7 +372,7 @@
       var o=opName(t);
       if(o==='GET'){adv();return {type:'GETVAR',name:readName()};}
       if(t.type==='OP'){return {type:'NAME',raw:adv().raw};}
-      throw new JeomError('L'+t.line+': 값 표현식 기대');
+      throw new JeomError(formatError('값 표현식 기대', t.line));
     }
     function parseFuncDef(){
       var ln=peek().line; adv();
