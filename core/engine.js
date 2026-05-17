@@ -305,7 +305,7 @@
       if(pos>=source.length) break;
       var ch=source[pos], sl=line, sc=col;
       if(!DOT_CHARS.has(ch))
-        throw new JeomError('L'+sl+':C'+sc+': 허용안되는 문자 \''+ch+'\' (U+'+ch.codePointAt(0).toString(16).toUpperCase().padStart(4,'0')+')');
+        throw new JeomError(formatError('허용안되는 문자 \''+ch+'\' (U+'+ch.codePointAt(0).toString(16).toUpperCase().padStart(4,'0')+')', sl, sc));
 
       if(ch===C.NUM_DELIM){
         // MAIN marker: •· 다음이 공백/EOF/주석인 경우만
