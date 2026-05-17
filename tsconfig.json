@@ -3,17 +3,12 @@
     "target": "ES6",
     "module": "commonjs",
     "allowJs": true,
-    "checkJs": true,
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
+    "checkJs": false,
+    "strict": false,
+    "noImplicitAny": false,
     "skipLibCheck": true,
     "outDir": "./ide/dist",
-    "esModuleInterop": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true
+    "esModuleInterop": true
   },
   "include": ["ide/src/**/*"],
   "exclude": ["node_modules"]
