@@ -1,3 +1,12 @@
+## v1.4.1 - 2026-05-17
+
+## Updates
+
+- Improved error message.
+- Fixed miner bugs.
+
+---
+
 ## v1.3.1 - 2026-05-13
 
 ## Updates
