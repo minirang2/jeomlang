@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 jeom_fmt.py — 점(Jeom) 언어 코드 포맷터
 
@@ -10,6 +11,19 @@ node.js 가 PATH에 있어야 합니다.
     python3 jeom_fmt.py hello.jeom -o out.jeom  # 출력 경로 직접 지정
     python3 jeom_fmt.py hello.jeom --check      # 포맷 필요 여부만 확인
     python3 jeom_fmt.py *.jeom                  # 여러 파일 한번에
+
+포맷 규칙:
+    1. 들여쓰기: ⋮ 블록마다 2스페이스 (--indent N 으로 변경)
+    2. 같은 논리 줄의 토큰은 스페이스 1개로 구분
+    3. ⋮ BLOCK  — 독립 줄, 이후 depth +1
+    4. ⋮⋮ END / …· ELSE / …‥ ELIF / ‥·· CATCH / ‥·˙ FINALLY — depth -1 후 독립 줄
+    5. 주석(◘) — 독립 줄, 텍스트 앞 스페이스 1개 정규화
+    6. 함수 정의(˙ <이름>), 인자(˙∘ <이름>) — 각각 독립 줄
+    7. VAR(∘ <이름> <값>), GET(∘∘ <이름>), STORE(∘⋅ <이름>), DEL(∘∘∘ <이름>) — 독립 줄
+    8. IF/WHILE/LOOP/TRY/CALL/RET 등 — 독립 줄
+    9. MAIN marker(•·) — 앞에 빈 줄 1개, 이후 depth +1
+   10. 연속 빈 줄 2개 이상 → 1개
+   11. 후행 공백 제거, 파일 끝 개행 보장
 """
 
 from __future__ import annotations
@@ -17,22 +31,26 @@ import sys, os, json, subprocess, argparse, shutil
 from typing import Dict, List, Optional, Tuple
 
 # ── 상수 ──────────────────────────────────────────────────────────────────────
-COMMENT_CHAR = '\u25D8'
-MAIN_RAW     = '\u2022\u00B7'
-BLOCK_OPEN   = '\u22EE'
-BLOCK_CLOSE  = '\u22EE\u22EE'
-FUNC_DEF     = '\u02D9'
-FUNC_ARG     = '\u02D9\u2218'
+COMMENT_CHAR = '\u25D8'        # ◘
+MAIN_RAW     = '\u2022\u00B7'  # •·
+BLOCK_OPEN   = '\u22EE'        # ⋮
+FUNC_DEF     = '\u02D9'        # ˙
+FUNC_ARG     = '\u02D9\u2218'  # ˙∘
+VAR_OP       = '\u2218'        # ∘
+GET_OP       = '\u2218\u2218'  # ∘∘
+STORE_OP     = '\u2218\u22C5'  # ∘⋅
+DEL_OP       = '\u2218\u2218\u2218'  # ∘∘∘
 
+# depth -1 후 독립 줄로 출력되는 토큰들
 BLOCK_END_OPS = {
-    '\u22EE\u22EE',       # ⋮⋮ END
-    '\u2026\u00B7',       # …· ELSE
-    '\u2026\u2025',       # …‥ ELIF
-    '\u2025\u00B7\u00B7', # ‥·· CATCH
-    '\u2025\u00B7\u02D9', # ‥·˙ FINALLY
+    '\u22EE\u22EE',           # ⋮⋮ END
+    '\u2026\u00B7',           # …· ELSE
+    '\u2026\u2025',           # …‥ ELIF
+    '\u2025\u00B7\u00B7',     # ‥·· CATCH
+    '\u2025\u00B7\u02D9',     # ‥·˙ FINALLY
 }
 
-# 이 토큰들은 현재 줄 flush 후 새 줄에 단독 출력
+# flush 후 독립 줄에 출력되는 명령들
 NEWLINE_OPS = {
     '\u2026',                 # … IF
     '\u2025\u2025',           # ‥‥ WHILE
@@ -40,17 +58,24 @@ NEWLINE_OPS = {
     '\u2025\u00B7',           # ‥· TRY
     '\u2025\u00B7\u2218',     # ‥·∘ THROW
     '\u2025\u00B7\u2981',     # ‥·⦁ ASSERT
-    '\u02D9\u02D9\u02D9',     # ˙˙˙ CALL
+    '\u02D9\u02D9\u02D9',     # ˙˙˙ CALL  (+ 이름)
     '\u02D9\u02D9',           # ˙˙ RET
     '\u2025\u2218',           # ‥∘ BREAK
     '\u2025\u2218\u2218',     # ‥∘∘ CONT
-    '\u22EF',                 # ⋯ GOTO
-    '\u22EF\u00B7',           # ⋯· LABEL
+    '\u22EF',                 # ⋯ GOTO    (+ 이름)
+    '\u22EF\u00B7',           # ⋯· LABEL  (+ 이름)
     '\u00B7',                 # · PRINT
     '\u00B7\u00B7',           # ·· PRINTLN
     '\u00B7\u2218',           # ·∘ ERR
     '\u22EE\u2218',           # ⋮∘ EXIT
     '\u22EF\u00B7\u2981',     # ⋯·⦁ IMPORT
+}
+
+# NEWLINE_OPS 중 뒤에 이름 토큰이 따라오는 것들
+NEWLINE_OPS_WITH_NAME = {
+    '\u02D9\u02D9\u02D9',  # ˙˙˙ CALL
+    '\u22EF',              # ⋯ GOTO
+    '\u22EF\u00B7',        # ⋯· LABEL
 }
 
 # ── JS 파서 인라인 스니펫 ─────────────────────────────────────────────────────
@@ -79,6 +104,7 @@ process.stdin.on('end', () => {
 });
 """
 
+# ── 엔진 탐색 ─────────────────────────────────────────────────────────────────
 def _find_engine(script_dir: str) -> Optional[str]:
     for c in [
         os.path.join(script_dir, 'jeom_engine.js'),
@@ -90,6 +116,7 @@ def _find_engine(script_dir: str) -> Optional[str]:
             return p
     return None
 
+# ── JS 파싱 호출 ──────────────────────────────────────────────────────────────
 def parse_with_js(source: str, engine_path: str) -> Tuple[bool, dict]:
     node = shutil.which('node') or shutil.which('nodejs')
     if not node:
@@ -127,7 +154,7 @@ class Formatter:
         self.depth    = 0
         self._lines:  List[str] = []
         self._cur:    List[str] = []
-        self._seen_comment_lines: set = set()
+        self._seen_comments: set = set()
 
     def _peek(self, offset: int = 0) -> Optional[dict]:
         i = self.pos + offset
@@ -148,8 +175,28 @@ class Formatter:
         if self._lines and self._lines[-1] != '':
             self._lines.append('')
 
+    def _next_is_name(self) -> bool:
+        """VAR/GET/STORE/DEL 뒤 이름 토큰 판별.
+        BLOCK_END_OPS 와 BLOCK_OPEN 만 제외 — 나머지 점 문자는 모두 이름 가능."""
+        nxt = self._peek()
+        if nxt is None or nxt['type'] != 'OP':
+            return False
+        raw = nxt['raw']
+        return raw not in BLOCK_END_OPS and raw != BLOCK_OPEN
+
+    def _next_is_func_name(self) -> bool:
+        """˙ / ˙∘ 뒤 이름 판별. 함수 관련 키워드는 이름으로 쓰지 않음."""
+        nxt = self._peek()
+        if nxt is None or nxt['type'] != 'OP':
+            return False
+        raw = nxt['raw']
+        return (raw not in BLOCK_END_OPS
+                and raw != BLOCK_OPEN
+                and raw != FUNC_DEF
+                and raw != FUNC_ARG)
+
     def _emit_comments_upto(self, line_no: int):
-        for ln in sorted(k for k in self.comments if k not in self._seen_comment_lines):
+        for ln in sorted(k for k in self.comments if k not in self._seen_comments):
             if ln > line_no:
                 break
             self._flush()
@@ -157,16 +204,16 @@ class Formatter:
             body = text[len(COMMENT_CHAR):].strip()
             fmt  = (COMMENT_CHAR + ' ' + body) if body else COMMENT_CHAR
             self._lines.append((self._ind() + fmt).rstrip())
-            self._seen_comment_lines.add(ln)
+            self._seen_comments.add(ln)
 
     def _emit_remaining_comments(self):
-        for ln in sorted(k for k in self.comments if k not in self._seen_comment_lines):
+        for ln in sorted(k for k in self.comments if k not in self._seen_comments):
             self._flush()
             text = self.comments[ln]['text']
             body = text[len(COMMENT_CHAR):].strip()
             fmt  = (COMMENT_CHAR + ' ' + body) if body else COMMENT_CHAR
             self._lines.append((self._ind() + fmt).rstrip())
-            self._seen_comment_lines.add(ln)
+            self._seen_comments.add(ln)
 
     def format(self) -> str:
         while self.pos < len(self.tokens):
@@ -175,14 +222,14 @@ class Formatter:
                 break
 
             self._emit_comments_upto(t['line'])
-
-            t   = self._peek()
+            t = self._peek()
             if t is None:
                 break
+
             tt  = t['type']
             raw = t['raw']
 
-            # ── 블록 닫기 (depth -1 먼저) ──────────────────────────────
+            # ── 블록 닫기 ────────────────────────────────────────────────
             if tt == 'OP' and raw in BLOCK_END_OPS:
                 self._adv()
                 self._flush()
@@ -191,7 +238,7 @@ class Formatter:
                 self._flush()
                 continue
 
-            # ── 블록 열기 ⋮ ─────────────────────────────────────────────
+            # ── 블록 열기 ⋮ ──────────────────────────────────────────────
             if tt == 'OP' and raw == BLOCK_OPEN:
                 self._adv()
                 self._flush()
@@ -200,68 +247,104 @@ class Formatter:
                 self.depth += 1
                 continue
 
-            # ── MAIN marker •· ──────────────────────────────────────────
+            # ── MAIN marker •· ───────────────────────────────────────────
             if tt == 'NUMBER' and raw == MAIN_RAW:
                 self._adv()
                 self._flush()
                 self._blank()
                 self._cur.append(raw)
                 self._flush()
-                self.depth += 1   # ★ MAIN 블록 내부 들여쓰기
+                self.depth += 1
                 continue
 
-            # ── 함수 정의 ˙ <이름> ─────────────────────────────────────
+            # ── 함수 정의 ˙ <이름> ───────────────────────────────────────
             if tt == 'OP' and raw == FUNC_DEF:
                 self._adv()
                 self._flush()
                 self._blank()
                 self._cur.append(raw)
-                nxt = self._peek()
-                if nxt and nxt['type'] == 'OP' \
-                        and nxt['raw'] not in BLOCK_END_OPS \
-                        and nxt['raw'] != BLOCK_OPEN:
-                    self._adv()
-                    self._cur.append(nxt['raw'])
+                if self._next_is_func_name():
+                    self._cur.append(self._adv()['raw'])
                 self._flush()
                 continue
 
-            # ── 함수 인자 ˙∘ <이름> ────────────────────────────────────
+            # ── 함수 인자 ˙∘ <이름> ─────────────────────────────────────
             if tt == 'OP' and raw == FUNC_ARG:
                 self._adv()
                 self._flush()
                 self._cur.append(raw)
-                nxt = self._peek()
-                if nxt and nxt['type'] == 'OP' \
-                        and nxt['raw'] not in BLOCK_END_OPS \
-                        and nxt['raw'] != BLOCK_OPEN:
-                    self._adv()
-                    self._cur.append(nxt['raw'])
+                if self._next_is_func_name():
+                    self._cur.append(self._adv()['raw'])
                 self._flush()
                 continue
 
-            # ── 새 줄이 필요한 명령들 ───────────────────────────────────
+            # ── VAR: ∘ <이름> <값> ──────────────────────────────────────
+            if tt == 'OP' and raw == VAR_OP:
+                self._adv()
+                self._flush()
+                self._cur.append(raw)
+                # 이름
+                if self._next_is_name():
+                    self._cur.append(self._adv()['raw'])
+                # 값 (NUMBER, STRING, OP 1개)
+                nxt = self._peek()
+                if nxt:
+                    if nxt['type'] in ('NUMBER', 'STRING'):
+                        self._cur.append(self._adv()['raw'])
+                    elif (nxt['type'] == 'OP'
+                          and nxt['raw'] not in BLOCK_END_OPS
+                          and nxt['raw'] != BLOCK_OPEN):
+                        self._cur.append(self._adv()['raw'])
+                self._flush()
+                continue
+
+            # ── GET: ∘∘ <이름> ──────────────────────────────────────────
+            if tt == 'OP' and raw == GET_OP:
+                self._adv()
+                self._flush()
+                self._cur.append(raw)
+                if self._next_is_name():
+                    self._cur.append(self._adv()['raw'])
+                self._flush()
+                continue
+
+            # ── STORE: ∘⋅ <이름> ────────────────────────────────────────
+            if tt == 'OP' and raw == STORE_OP:
+                self._adv()
+                self._flush()
+                self._cur.append(raw)
+                if self._next_is_name():
+                    self._cur.append(self._adv()['raw'])
+                self._flush()
+                continue
+
+            # ── DEL: ∘∘∘ <이름> ─────────────────────────────────────────
+            if tt == 'OP' and raw == DEL_OP:
+                self._adv()
+                self._flush()
+                self._cur.append(raw)
+                if self._next_is_name():
+                    self._cur.append(self._adv()['raw'])
+                self._flush()
+                continue
+
+            # ── 새 줄 명령들 ─────────────────────────────────────────────
             if tt == 'OP' and raw in NEWLINE_OPS:
                 self._adv()
                 self._flush()
                 self._cur.append(raw)
-                # CALL(˙˙˙) / GOTO(⋯) / LABEL(⋯·) 은 이름 토큰이 뒤따름
-                if raw in ('\u02D9\u02D9\u02D9', '\u22EF', '\u22EF\u00B7'):
-                    nxt = self._peek()
-                    if nxt and nxt['type'] == 'OP':
-                        self._adv()
-                        self._cur.append(nxt['raw'])
+                if raw in NEWLINE_OPS_WITH_NAME and self._next_is_name():
+                    self._cur.append(self._adv()['raw'])
                 self._flush()
                 continue
 
-            # ── NUMBER / STRING / 일반 OP ───────────────────────────────
+            # ── NUMBER / STRING / 일반 OP ────────────────────────────────
             self._adv()
             self._cur.append(raw)
 
         self._flush()
         self._emit_remaining_comments()
         self._flush()
-
-        # ⋮⋮(END)로 닫힌 MAIN depth 복원은 이미 BLOCK_END_OPS에서 처리됨
 
         # 연속 빈 줄 축소
         out: List[str] = []
@@ -327,9 +410,11 @@ def process_file(src_path: str, out_path: str, engine_path: str, opts: dict) -> 
             f.write(result)
         os.replace(tmp, out_path)
     except PermissionError:
-        _try_remove(tmp); return False, f'쓰기 권한 없음: {out_path}'
+        _try_remove(tmp)
+        return False, f'쓰기 권한 없음: {out_path}'
     except Exception as e:
-        _try_remove(tmp); return False, f'쓰기 오류: {e}'
+        _try_remove(tmp)
+        return False, f'쓰기 오류: {e}'
 
     return True, out_path
 
@@ -430,6 +515,7 @@ def main():
 
     if fail_count > 0:
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()
