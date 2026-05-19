@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-jeom_fmt.py — 점(Jeom) 언어 코드 포맷터
+formatter — 점(Jeom) 언어 코드 포맷터
 
-JS 엔진(jeom_engine.js)으로 파싱 후 Python이 포맷 출력.
+JS 엔진(engine.js)으로 파싱 후 Python이 포맷 출력.
 node.js 가 PATH에 있어야 합니다.
 
 사용법:
-    python3 jeom_fmt.py hello.jeom              # hello.fmt.jeom 생성
-    python3 jeom_fmt.py hello.jeom -r           # 포맷 후 원본 삭제
-    python3 jeom_fmt.py hello.jeom -o out.jeom  # 출력 경로 직접 지정
-    python3 jeom_fmt.py hello.jeom --check      # 포맷 필요 여부만 확인
-    python3 jeom_fmt.py *.jeom                  # 여러 파일 한번에
+    python3 formatter.py hello.jeom              # hello.fmt.jeom 생성
+    python3 formatter.py hello.jeom -r           # 포맷 후 원본 삭제
+    python3 formatter.py hello.jeom -o out.jeom  # 출력 경로 직접 지정
+    python3 formatter.py hello.jeom --check      # 포맷 필요 여부만 확인
+    python3 formatter.py *.jeom                  # 여러 파일 한번에
 
 포맷 규칙:
     1. 들여쓰기: ⋮ 블록마다 2스페이스 (--indent N 으로 변경)
@@ -107,9 +107,9 @@ process.stdin.on('end', () => {
 # ── 엔진 탐색 ─────────────────────────────────────────────────────────────────
 def _find_engine(script_dir: str) -> Optional[str]:
     for c in [
-        os.path.join(script_dir, 'jeom_engine.js'),
-        os.path.join(script_dir, '..', 'jeom_engine.js'),
-        os.path.join(os.getcwd(), 'jeom_engine.js'),
+        os.path.join(script_dir, 'engine.js'),
+        os.path.join(script_dir, '..', 'engine.js'),
+        os.path.join(os.getcwd(), 'engine.js'),
     ]:
         p = os.path.abspath(c)
         if os.path.exists(p):
@@ -434,11 +434,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 예제:
-  python3 jeom_fmt.py hello.jeom              → hello.fmt.jeom
-  python3 jeom_fmt.py hello.jeom -r           → 생성 후 원본 삭제
-  python3 jeom_fmt.py hello.jeom -o out.jeom  → 경로 직접 지정
-  python3 jeom_fmt.py hello.jeom --check      → 확인만 (exit 1 if needed)
-  python3 jeom_fmt.py *.jeom                  → 여러 파일
+  python3 formatter.py hello.jeom              → hello.fmt.jeom
+  python3 formatter.py hello.jeom -r           → 생성 후 원본 삭제
+  python3 formatter.py hello.jeom -o out.jeom  → 경로 직접 지정
+  python3 formatter.py hello.jeom --check      → 확인만 (exit 1 if needed)
+  python3 formatter.py *.jeom                  → 여러 파일
         """,
     )
     ap.add_argument('files', nargs='+', metavar='파일.jeom')
@@ -447,7 +447,7 @@ def main():
     ap.add_argument('--check', action='store_true', help='포맷 필요 여부 확인만')
     ap.add_argument('--indent', type=int, default=2, metavar='N', help='들여쓰기 스페이스 수 (기본: 2)')
     ap.add_argument('--suffix', default='.fmt', metavar='접미사', help='출력 접미사 (기본: .fmt)')
-    ap.add_argument('--engine', metavar='경로', help='jeom_engine.js 경로 (기본: 자동)')
+    ap.add_argument('--engine', metavar='경로', help='engine.js 경로 (기본: 자동)')
     args = ap.parse_args()
 
     if args.output and len(args.files) > 1:
@@ -458,7 +458,7 @@ def main():
     script_dir  = os.path.dirname(os.path.abspath(__file__))
     engine_path = args.engine or _find_engine(script_dir)
     if not engine_path:
-        _err('jeom_engine.js 를 찾을 수 없습니다. --engine 으로 경로를 지정하세요.')
+        _err('engine.js 를 찾을 수 없습니다. --engine 으로 경로를 지정하세요.')
         sys.exit(1)
 
     opts = {'check': args.check, 'indent': args.indent}
