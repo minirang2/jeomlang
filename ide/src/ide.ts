@@ -36,6 +36,8 @@ interface Window {
   doDecode: () => void;
   insertEnc: (type: 's' | 'n' | 'f') => void;
   loadEx: (name: string) => void;
+  undo: () => void;
+  redo: () => void;
 }
 
 (function () {
@@ -50,13 +52,13 @@ interface Window {
     const S = encodeString, N = encodeNumber;
     return {
       hello: `◘ Hello, Jeom!\n•·\n  ${S('Hello, Jeom!')}\n  ··\n⋮⋮`,
-      vars: `◘ 변수와 연산\n•·\n  ∘ · ${N(10)}\n  ∘ ·· ${N(3)}\n  ∘∘ ·\n  ∘∘ ··\n  ⋅\n  ··\n  ∘∘ ·\n  ∘∘ ··\n  ⋅⋅\n  ··\n  ∘∘ ·\n  ∘∘ ··\n  ⋅⋅⋅\n  ··\n⋮⋮`,
-      func: `◘ 함수 정의와 호출\n˙ ·∘·∘\n˙∘ ·\n˙∘ ··\n⋮\n  ∘∘ ·\n  ∘∘ ··\n  ⋅\n  ˙˙\n⋮⋮\n\n•·\n  ${N(7)}\n  ${N(5)}\n  ˙˙˙ ·∘·∘\n  ··\n⋮⋮`,
-      loop: `◘ 1부터 5까지 출력\n•·\n  ∘ · ${N(1)}\n  ‥‥\n  ⋮\n    ∘∘ ·\n    ${N(6)}\n    ⋅‧‧‧\n  ⋮⋮\n  ⋮\n    ∘∘ ·\n    ··\n    ∘∘ ·\n    ${N(1)}\n    ⋅\n    ∘⋅ ·\n  ⋮⋮\n⋮⋮`,
-      array: `◘ 배열 조작\n•·\n  ${N(10)}\n  ${N(20)}\n  ${N(30)}\n  ${N(3)}\n  ◦\n  ∘⋅ ·\n  ∘∘ ·\n  ··\n  ∘∘ ·\n  ${N(1)}\n  ◦◦\n  ··\n  ∘∘ ·\n  ${N(99)}\n  ◦∘\n  ··\n  ∘∘ ·\n  ⸳‧\n  ··\n⋮⋮`,
-      trycatch: `◘ 오류 처리\n•·\n  ‥·\n  ⋮\n    ${N(10)}\n    ${N(0)}\n    ⋅∘\n    ··\n  ⋮⋮\n  ‥··\n  ⋮\n    ∘⋅ ·∘\n    ${S('오류: ')}\n    ∘∘ ·∘\n    ⋅\n    ··\n  ⋮⋮\n  ‥·˙\n  ⋮\n    ${S('항상 실행')}\n    ··\n  ⋮⋮\n⋮⋮`,
+      vars: `◘ 변수와 연산\n•·\n  ∘ · ${N(10)}\n  ∘ ·· ${N(3)}\n  ∘∘ ·\n  ∘∘ ··\n  ⋅\n  ··\n  ∘∘ ·\n  ∘∘ ··\n  ⋅⋅\n  ··\n  ∘∘ ·\n  ∘∘ ··[...]
+      func: `◘ 함수 정의와 호출\n˙ ·∘·∘\n˙∘ ·\n˙∘ ··\n⋮\n  ∘∘ ·\n  ∘∘ ··\n  ⋅\n  ˙˙\n⋮⋮\n\n•·\n  ${N(7)}\n  ${N(5)}\n  ˙˙˙ ·∘·∘\n  ··\n�[...]
+      loop: `◘ 1부터 5까지 출력\n•·\n  ∘ · ${N(1)}\n  ‥‥\n  ⋮\n    ∘∘ ·\n    ${N(6)}\n    ⋅‧‧‧\n  ⋮⋮\n  ⋮\n    ∘∘ ·\n    ··\n    ∘∘ ·\n    ${N(1)[...]
+      array: `◘ 배열 조작\n•·\n  ${N(10)}\n  ${N(20)}\n  ${N(30)}\n  ${N(3)}\n  ◦\n  ∘⋅ ·\n  ∘∘ ·\n  ··\n  ∘∘ ·\n  ${N(1)}\n  ◦◦\n  ··\n  ∘∘ ·\n  ${N(99)}\n [...]
+      trycatch: `◘ 오류 처리\n•·\n  ‥·\n  ⋮\n    ${N(10)}\n    ${N(0)}\n    ⋅∘\n    ··\n  ⋮⋮\n  ‥··\n  ⋮\n    ∘⋅ ·∘\n    ${S('오류: ')}\n    ∘∘ ·∘\n  [...]
       input: `◘ 입력 받기\n•·\n  ${S('이름: ')}\n  ·\n  ·˙\n  ∘⋅ ·\n  ${S('안녕, ')}\n  ∘∘ ·\n  ⋅\n  ${S('!')}\n  ⋅\n  ··\n⋮⋮`,
-      dict: `◘ 딕셔너리\n•·\n  ${S('name')} ${S('jeom')}\n  ${S('ver')} ${N(1)}\n  ${N(2)}\n  ◦‧\n  ∘⋅ ·\n  ∘∘ ·\n  ··\n  ∘∘ ·\n  ${S('name')}\n  ◦‧‧\n  ··\n⋮⋮`,
+      dict: `◘ 딕셔너리\n•·\n  ${S('name')} ${S('jeom')}\n  ${S('ver')} ${N(1)}\n  ${N(2)}\n  ◦‧\n  ∘⋅ ·\n  ∘∘ ·\n  ··\n  ∘∘ ·\n  ${S('name')}\n  ◦‧‧\n  ··\n�[...]
     };
   }
 
@@ -85,7 +87,7 @@ interface Window {
     { label: '시스템',  items: [['⋮∘','EXIT'],['⋮⦁','DEBUG'],['⋮‧','RAND'],['⋮⋅','TIME'],['⋮‧‧','HASH'],['⋮·⦁','SLEEP'],['⋯·⦁','IMPORT']] },
   ];
 
-  // ── DOM 요소 ─────────────────────────────────────────────────────────────
+  // ── DOM 요소 ─────────────────────────────────────────────────────────��[...]
   const editor   = document.getElementById('editor') as HTMLTextAreaElement;
   const lineNums = document.getElementById('lineNums') as HTMLDivElement;
   const outputEl = document.getElementById('output') as HTMLDivElement;
@@ -95,13 +97,79 @@ interface Window {
   let inputResolve: ((value: string) => void) | null = null;
   let lastSEnc = '', lastNEnc = '', lastFEnc = '';
 
-  // ── 상태 표시 ─────────────────────────────────────────────────────────────
+  // ── 실행취소/다시실행 히스토리 ──────────────────────────────────────────
+  interface EditorState {
+    value: string;
+    selectionStart: number;
+    selectionEnd: number;
+  }
+
+  let undoHistory: EditorState[] = [];
+  let redoHistory: EditorState[] = [];
+  const MAX_HISTORY = 100;
+
+  function saveState() {
+    undoHistory.push({
+      value: editor.value,
+      selectionStart: editor.selectionStart,
+      selectionEnd: editor.selectionEnd,
+    });
+    if (undoHistory.length > MAX_HISTORY) {
+      undoHistory.shift();
+    }
+    redoHistory = [];
+    updateHistoryButtons();
+  }
+
+  function updateHistoryButtons() {
+    const undoBtn = document.getElementById('undoBtn') as HTMLButtonElement;
+    const redoBtn = document.getElementById('redoBtn') as HTMLButtonElement;
+    undoBtn.disabled = undoHistory.length === 0;
+    redoBtn.disabled = redoHistory.length === 0;
+  }
+
+  function restoreState(state: EditorState) {
+    editor.value = state.value;
+    editor.selectionStart = state.selectionStart;
+    editor.selectionEnd = state.selectionEnd;
+    updateLN();
+    editor.focus();
+  }
+
+  function undo() {
+    if (undoHistory.length === 0) return;
+    redoHistory.push({
+      value: editor.value,
+      selectionStart: editor.selectionStart,
+      selectionEnd: editor.selectionEnd,
+    });
+    const state = undoHistory.pop();
+    if (state) restoreState(state);
+    updateHistoryButtons();
+  }
+
+  function redo() {
+    if (redoHistory.length === 0) return;
+    undoHistory.push({
+      value: editor.value,
+      selectionStart: editor.selectionStart,
+      selectionEnd: editor.selectionEnd,
+    });
+    const state = redoHistory.pop();
+    if (state) restoreState(state);
+    updateHistoryButtons();
+  }
+
+  window.undo = undo;
+  window.redo = redo;
+
+  // ── 상태 표시 ────────────────────────────────────────────────────────��[...]
   function setStatus(msg: string, type?: 'ok' | 'err' | 'run' | '준비') {
     sDot.className = 's-dot' + (type === 'ok' ? ' ok' : type === 'err' ? ' err' : type === 'run' ? ' run' : '');
     sTxt.textContent = msg;
   }
 
-  // ── 출력 ──────────────────────────────────────────────────────────────────
+  // ── 출력 ──────────────────────────────────────────────────────────��[...]
   function appendOut(text: string, cls?: string) {
     const sp = document.createElement('span');
     sp.className = cls || 'o-out';
@@ -111,7 +179,7 @@ interface Window {
     pv.scrollTop = pv.scrollHeight;
   }
 
-  // ── 실행 ──────────────────────────────────────────────────────────────────
+  // ── 실행 ──────────────────────────────────────────────────────────��[...]
   async function runCode() {
     const src = editor.value;
     if (!src.trim()) return;
@@ -147,7 +215,7 @@ interface Window {
   }
   window.runCode = runCode;
 
-  // ── 입력 처리 ─────────────────────────────────────────────────────────────
+  // ── 입력 처리 ────────────────────────────────────────────────────────�[...]
   function submitInput() {
     const val = (document.getElementById('inputFld') as HTMLInputElement).value;
     (document.getElementById('inputOv') as HTMLDivElement).classList.remove('show');
@@ -160,7 +228,7 @@ interface Window {
     if (e.key === 'Enter') submitInput();
   });
 
-  // ── 문법 검사 ─────────────────────────────────────────────────────────────
+  // ── 문법 검사 ────────────────────────────────────────────────────────�[...]
   function checkCode() {
     const src = editor.value;
     switchTab('output');
@@ -187,7 +255,7 @@ interface Window {
   }
   window.clearOutput = clearOutput;
 
-  // ── 파일 저장/열기 ────────────────────────────────────────────────────────
+  // ── 파일 저장/열기 ──────────────────────────────────────────────────────[...]
   function downloadCode() {
     let fn = (document.getElementById('filename') as HTMLInputElement).value || 'main.jeom';
     if (!fn.endsWith('.jeom')) fn += '.jeom';
@@ -206,6 +274,7 @@ interface Window {
     const r = new FileReader();
     r.onload = ev => {
       if (ev.target) {
+        saveState();
         editor.value = ev.target.result as string;
         updateLN();
       }
@@ -215,7 +284,7 @@ interface Window {
   }
   window.openFile = openFile;
 
-  // ── 탭 전환 ───────────────────────────────────────────────────────────────
+  // ── 탭 전환 ─────────────────────────────────────────────────────────�[...]
   function switchTab(name: string) {
     const names = ['output', 'encoder', 'tokens'];
     document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', names[i] === name));
@@ -224,7 +293,7 @@ interface Window {
   }
   window.switchTab = switchTab;
 
-  // ── 줄번호 & 커서 ─────────────────────────────────────────────────────────
+  // ── 줄번호 & 커서 ──────────────────────────────────────────────────────��[...]
   function updateLN() {
     const lines = editor.value.split('\n');
     lineNums.innerHTML = lines.map((_, i) => '<span>' + (i + 1) + '</span>').join('');
@@ -257,9 +326,21 @@ interface Window {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault(); downloadCode();
     }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      e.preventDefault();
+      if (e.shiftKey) redo();
+      else undo();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+      e.preventDefault(); redo();
+    }
   });
 
-  // ── 인코더 ────────────────────────────────────────────────────────────────
+  editor.addEventListener('input', () => {
+    saveState();
+  });
+
+  // ── 인코더 ─────────────────────────────────────────────────────────��[...]
   function encStr() {
     const v = (document.getElementById('sEncIn') as HTMLInputElement).value;
     const el = document.getElementById('sEncOut') as HTMLElement;
@@ -311,7 +392,7 @@ interface Window {
   }
   window.insertEnc = insertEnc;
 
-  // ── 토스트 ────────────────────────────────────────────────────────────────
+  // ── 토스트 ─────────────────────────────────────────────────────────��[...]
   function toast(msg: string) {
     const el = document.getElementById('toast') as HTMLElement;
     el.textContent = msg;
@@ -319,7 +400,7 @@ interface Window {
     setTimeout(() => el.classList.remove('show'), 1800);
   }
 
-  // ── 토큰 삽입 ─────────────────────────────────────────────────────────────
+  // ── 토큰 삽입 ────────────────────────────────────────────────────────�[...]
   function insertToken(tok: string) {
     const s = editor.selectionStart, end = editor.selectionEnd;
     editor.value = editor.value.substring(0, s) + tok + editor.value.substring(end);
@@ -327,7 +408,7 @@ interface Window {
     editor.focus(); updateLN();
   }
 
-  // ── 사이드바 빌드 ─────────────────────────────────────────────────────────
+  // ── 사이드바 빌드 ──────────────────────────────────────────────────────�[...]
   function buildSidebar() {
     const list = document.getElementById('refList') as HTMLElement;
     REF_GROUPS.forEach(g => {
@@ -345,7 +426,7 @@ interface Window {
     });
   }
 
-  // ── 토큰 그리드 빌드 ──────────────────────────────────────────────────────
+  // ── 토큰 그리드 빌드 ─────────────────────────────────────────────────────[...]
   function buildTokenGrid() {
     const grid = document.getElementById('tokGrid') as HTMLElement;
     REF_GROUPS.forEach(g => {
@@ -359,19 +440,21 @@ interface Window {
     });
   }
 
-  // ── 예제 로드 ─────────────────────────────────────────────────────────────
+  // ── 예제 로드 ────────────────────────────────────────────────────────�[...]
   function loadEx(name: string) {
+    saveState();
     editor.value = EXAMPLES[name] || '';
     updateLN();
     setStatus('예제 로드됨');
   }
   window.loadEx = loadEx;
 
-  // ── 초기화 ────────────────────────────────────────────────────────────────
+  // ── 초기화 ─────────────────────────────────────────────────────────��[...]
   buildSidebar();
   buildTokenGrid();
   loadEx('hello');
   updateLN();
   setStatus('준비', '준비');
+  updateHistoryButtons();
 
 })();
