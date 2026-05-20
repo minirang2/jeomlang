@@ -37,6 +37,13 @@
             <div class="editor-toolbar">
                 <input class="fn-input" id="filename" value="main.jeom" spellcheck="false" />
                 <div class="sep"></div>
+                <button class="btn" id="undoBtn" onclick="undo()" title="Ctrl+Z">
+                    <span class="btn-icon">⟲</span> 취소
+                </button>
+                <button class="btn" id="redoBtn" onclick="redo()" title="Ctrl+Shift+Z">
+                    <span class="btn-icon">⟳</span> 다시
+                </button>
+                <div class="sep"></div>
                 <button class="btn primary" onclick="runCode()" title="Ctrl+Enter / F5">
                     <span class="btn-icon">●</span> 실행
                 </button>
@@ -90,7 +97,7 @@
             </div>
             <div class="panel-body">
                 <div class="pview active" id="output-tab">
-                    <div id="output"><span class="o-info">◘ 점(Jeom) 웹 VM 준비됨<br>◘ [● 실행] 또는 Ctrl+Enter 로 실행<br>◘ 사이드바 명령 클릭 → 에디터에 삽입</span></div>
+                    <div id="output"><span class="o-info">◘ 점(Jeom) 웹 VM 준비됨<br>◘ [● 실행] 또는 Ctrl+Enter 로 실행<br>◘ 사이드바 명령 클릭 → 에디터에 삽입<[...]
                 </div>
                 <div class="pview" id="encoder-tab">
                     <div class="enc-wrap">
