@@ -1,5 +1,5 @@
 "use strict";
-/* jeom_ide.ts — 점(Jeom) 웹 IDE 로직 */
+/* ide.ts — 점(Jeom) 웹 IDE 로직 */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -253,7 +253,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         document.getElementById('sLn').textContent = String(before.split('\n').length);
         document.getElementById('sCol').textContent = String(p - before.lastIndexOf('\n'));
     }
-    editor.addEventListener('input', updateLN);
+    editor.addEventListener('input', () => {
+        updateLN();
+        saveState();
+    });
     editor.addEventListener('scroll', () => { lineNums.scrollTop = editor.scrollTop; });
     editor.addEventListener('click', updateCursor);
     editor.addEventListener('keyup', updateCursor);
@@ -284,9 +287,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
             e.preventDefault();
             redo();
         }
-    });
-    editor.addEventListener('input', () => {
-        saveState();
     });
     // ── 인코더 ────────────────────────────────────────────────────────────────
     function encStr() {
