@@ -1,0 +1,23 @@
+{
+  "scopeName": "source.jeom",
+  "name": "Jeom",
+  "patterns": [
+    {
+      "name": "keyword.control.jeom",
+      "match": "⋮⋮|⋮|…|‥|˙|∘"
+    },
+    {
+      "name": "constant.numeric.jeom",
+      "match": "•[·.‧․]+•"
+    },
+    {
+      "name": "string.quoted.jeom",
+      "match": "●[·.‧․]+●"
+    },
+    {
+      "name": "comment.line.jeom",
+      "match": "◘.*$"
+    }
+  ],
+  "repository": {}
+}
