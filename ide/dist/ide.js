@@ -1,5 +1,5 @@
 "use strict";
-/* ide.js — 점(Jeom) 웹 IDE 로직 */
+/* jeom_ide.ts — 점(Jeom) 웹 IDE 로직 */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12,7 +12,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 (function () {
     'use strict';
     const { encodeString, encodeNumber, encodeFloat, decodeString, decodeNumber, tokenize, parse, JeomVM, JeomError, JeomExit, OP_TABLE } = JeomEngine;
-    // ── 예제 코드 (빌드 시 engine.js로 생성) ───────────────────────────
+    // ── 예제 코드 (빌드 시 jeom_engine.js로 생성) ───────────────────────────
     // encodeString / encodeNumber 을 여기서 직접 호출해 런타임에 생성
     function makeExamples() {
         const S = encodeString, N = encodeNumber;
@@ -52,6 +52,64 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     const sTxt = document.getElementById('sTxt');
     let inputResolve = null;
     let lastSEnc = '', lastNEnc = '', lastFEnc = '';
+    let undoHistory = [];
+    let redoHistory = [];
+    const MAX_HISTORY = 100;
+    function saveState() {
+        undoHistory.push({
+            value: editor.value,
+            selectionStart: editor.selectionStart,
+            selectionEnd: editor.selectionEnd,
+        });
+        if (undoHistory.length > MAX_HISTORY) {
+            undoHistory.shift();
+        }
+        redoHistory = [];
+        updateHistoryButtons();
+    }
+    function updateHistoryButtons() {
+        const undoBtn = document.getElementById('undoBtn');
+        const redoBtn = document.getElementById('redoBtn');
+        if (undoBtn)
+            undoBtn.disabled = undoHistory.length === 0;
+        if (redoBtn)
+            redoBtn.disabled = redoHistory.length === 0;
+    }
+    function restoreState(state) {
+        editor.value = state.value;
+        editor.selectionStart = state.selectionStart;
+        editor.selectionEnd = state.selectionEnd;
+        updateLN();
+        editor.focus();
+    }
+    function undo() {
+        if (undoHistory.length === 0)
+            return;
+        redoHistory.push({
+            value: editor.value,
+            selectionStart: editor.selectionStart,
+            selectionEnd: editor.selectionEnd,
+        });
+        const state = undoHistory.pop();
+        if (state)
+            restoreState(state);
+        updateHistoryButtons();
+    }
+    function redo() {
+        if (redoHistory.length === 0)
+            return;
+        undoHistory.push({
+            value: editor.value,
+            selectionStart: editor.selectionStart,
+            selectionEnd: editor.selectionEnd,
+        });
+        const state = redoHistory.pop();
+        if (state)
+            restoreState(state);
+        updateHistoryButtons();
+    }
+    window.undo = undo;
+    window.redo = redo;
     // ── 상태 표시 ─────────────────────────────────────────────────────────────
     function setStatus(msg, type) {
         sDot.className = 's-dot' + (type === 'ok' ? ' ok' : type === 'err' ? ' err' : type === 'run' ? ' run' : '');
@@ -166,6 +224,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         const r = new FileReader();
         r.onload = ev => {
             if (ev.target) {
+                saveState();
                 editor.value = ev.target.result;
                 updateLN();
             }
@@ -214,6 +273,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
             e.preventDefault();
             downloadCode();
         }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+            e.preventDefault();
+            if (e.shiftKey)
+                redo();
+            else
+                undo();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+            e.preventDefault();
+            redo();
+        }
+    });
+    editor.addEventListener('input', () => {
+        saveState();
     });
     // ── 인코더 ────────────────────────────────────────────────────────────────
     function encStr() {
@@ -324,6 +397,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     }
     // ── 예제 로드 ─────────────────────────────────────────────────────────────
     function loadEx(name) {
+        saveState();
         editor.value = EXAMPLES[name] || '';
         updateLN();
         setStatus('예제 로드됨');
@@ -335,4 +409,5 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     loadEx('hello');
     updateLN();
     setStatus('준비', '준비');
+    updateHistoryButtons();
 })();
