@@ -36,6 +36,8 @@ interface Window {
   doDecode: () => void;
   insertEnc: (type: 's' | 'n' | 'f') => void;
   loadEx: (name: string) => void;
+  undo: () => void;
+  redo: () => void;
 }
 
 (function () {
@@ -94,6 +96,72 @@ interface Window {
 
   let inputResolve: ((value: string) => void) | null = null;
   let lastSEnc = '', lastNEnc = '', lastFEnc = '';
+
+  // ── 실행취소/다시실행 히스토리 ─────────────────────────────────────────
+  interface EditorState {
+    value: string;
+    selectionStart: number;
+    selectionEnd: number;
+  }
+
+  let undoHistory: EditorState[] = [];
+  let redoHistory: EditorState[] = [];
+  const MAX_HISTORY = 100;
+
+  function saveState() {
+    undoHistory.push({
+      value: editor.value,
+      selectionStart: editor.selectionStart,
+      selectionEnd: editor.selectionEnd,
+    });
+    if (undoHistory.length > MAX_HISTORY) {
+      undoHistory.shift();
+    }
+    redoHistory = [];
+    updateHistoryButtons();
+  }
+
+  function updateHistoryButtons() {
+    const undoBtn = document.getElementById('undoBtn') as HTMLButtonElement;
+    const redoBtn = document.getElementById('redoBtn') as HTMLButtonElement;
+    if (undoBtn) undoBtn.disabled = undoHistory.length === 0;
+    if (redoBtn) redoBtn.disabled = redoHistory.length === 0;
+  }
+
+  function restoreState(state: EditorState) {
+    editor.value = state.value;
+    editor.selectionStart = state.selectionStart;
+    editor.selectionEnd = state.selectionEnd;
+    updateLN();
+    editor.focus();
+  }
+
+  function undo() {
+    if (undoHistory.length === 0) return;
+    redoHistory.push({
+      value: editor.value,
+      selectionStart: editor.selectionStart,
+      selectionEnd: editor.selectionEnd,
+    });
+    const state = undoHistory.pop();
+    if (state) restoreState(state);
+    updateHistoryButtons();
+  }
+
+  function redo() {
+    if (redoHistory.length === 0) return;
+    undoHistory.push({
+      value: editor.value,
+      selectionStart: editor.selectionStart,
+      selectionEnd: editor.selectionEnd,
+    });
+    const state = redoHistory.pop();
+    if (state) restoreState(state);
+    updateHistoryButtons();
+  }
+
+  window.undo = undo;
+  window.redo = redo;
 
   // ── 상태 표시 ─────────────────────────────────────────────────────────────
   function setStatus(msg: string, type?: 'ok' | 'err' | 'run' | '준비') {
@@ -206,6 +274,7 @@ interface Window {
     const r = new FileReader();
     r.onload = ev => {
       if (ev.target) {
+        saveState();
         editor.value = ev.target.result as string;
         updateLN();
       }
@@ -238,7 +307,10 @@ interface Window {
     (document.getElementById('sCol') as HTMLElement).textContent = String(p - before.lastIndexOf('\n'));
   }
 
-  editor.addEventListener('input', updateLN);
+  editor.addEventListener('input', () => {
+    updateLN();
+    saveState();
+  });
   editor.addEventListener('scroll', () => { lineNums.scrollTop = editor.scrollTop; });
   editor.addEventListener('click', updateCursor);
   editor.addEventListener('keyup', updateCursor);
@@ -256,6 +328,14 @@ interface Window {
     }
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault(); downloadCode();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      e.preventDefault();
+      if (e.shiftKey) redo();
+      else undo();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+      e.preventDefault(); redo();
     }
   });
 
@@ -361,6 +441,7 @@ interface Window {
 
   // ── 예제 로드 ─────────────────────────────────────────────────────────────
   function loadEx(name: string) {
+    saveState();
     editor.value = EXAMPLES[name] || '';
     updateLN();
     setStatus('예제 로드됨');
@@ -373,5 +454,6 @@ interface Window {
   loadEx('hello');
   updateLN();
   setStatus('준비', '준비');
+  updateHistoryButtons();
 
 })();
