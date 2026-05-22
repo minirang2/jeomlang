@@ -1,1 +1,2 @@
 *.jeom linguist-language=JeomLang
+.prettierrc linguist-language=json
