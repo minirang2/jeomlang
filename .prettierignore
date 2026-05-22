@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.vercel/
+out/
+
+ide/dist/
+tools/vscode-extension/temp/
+
+*.jeom
+examples/
+stdlib/
+
+assets/
+.DS_Store
+Thumbs.db
