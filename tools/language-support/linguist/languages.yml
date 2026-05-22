@@ -1,8 +1,7 @@
 Jeom:
   type: programming
-  color: "#111111"
+  color: "#0bcde3"
   extensions:
     - ".jeom"
   tm_scope: source.jeom
   ace_mode: text
-  language_id: 999999
