@@ -1,8 +1,3 @@
-# Contributors
-
-프로젝트에 기여해주셔서 감사합니다 ✨
-
 | Name | GitHub | Contribution |
-|------|------|------|------|
-| captain34643875-wq | https://github.com/captain34643875-wq | collaborator |
-|  |  |  |
+|------|------|------|
+| captain34643875-wq | [@captain34643875-wq](https://github.com/captain34643875-wq) | collaborator |
