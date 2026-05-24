@@ -1,13 +1,26 @@
 {
   "name": "jeomlang",
   "version": "1.0.0",
-  "description": "",
-  "main": "ide.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "description": "점 유니코드 문자만으로 프로그래밍하는 난해 언어",
+  "main": "core/engine.js",
+  "bin": {
+    "jeom": "core/cli.js"
   },
-  "keywords": [],
-  "author": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node core/cli.js repl",
+    "cli": "node core/cli.js"
+  },
+  "keywords": ["esoteric", "language", "unicode", "interpreter", "jeom", "점"],
+  "author": "minirang",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/minirang/jeomlang.git"
+  },
+  "bugs": {
+    "url": "https://github.com/minirang/jeomlang/issues"
+  },
+  "homepage": "https://jeomlang.vercel.app/",
   "type": "commonjs"
 }

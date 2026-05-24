@@ -22,10 +22,10 @@ const fs = require('fs');
 const path = require('path');
 const rl = require('readline');
 
-// jeom_engine.js 로드
-const enginePath = path.join(__dirname, 'jeom_engine.js');
+// engine.js 로드
+const enginePath = path.join(__dirname, 'engine.js');
 if (!fs.existsSync(enginePath)) {
-    console.error('오류: jeom_engine.js 를 찾을 수 없습니다. 같은 디렉터리에 있어야 합니다.');
+    console.error('오류: engine.js 를 찾을 수 없습니다. 같은 디렉터리에 있어야 합니다.');
     process.exit(1);
 }
 const JeomEngine = require(enginePath);
