@@ -1,6 +1,6 @@
 {
   "name": "jeomlang",
-  "version": "1.0.0",
+  "version": "1.4.1",
   "description": "점 유니코드 문자만으로 프로그래밍하는 난해 언어",
   "main": "core/engine.js",
   "bin": {
