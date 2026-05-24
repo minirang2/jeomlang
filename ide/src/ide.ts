@@ -44,7 +44,7 @@ interface Window {
   const { encodeString, encodeNumber, encodeFloat, decodeString, decodeNumber,
           tokenize, parse, JeomVM, JeomError, JeomExit, OP_TABLE } = JeomEngine;
 
-  // ── 예제 코드 (빌드 시 jeom_engine.js로 생성) ───────────────────────────
+  // ── 예제 코드 (빌드 시 engine.js로 생성) ───────────────────────────
   // encodeString / encodeNumber 을 여기서 직접 호출해 런타임에 생성
   function makeExamples(): Record<string, string> {
     const S = encodeString, N = encodeNumber;
