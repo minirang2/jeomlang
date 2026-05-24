@@ -429,7 +429,7 @@ def _info(m): print(_c('·', '36') + ' ' + m)
 # ── CLI ───────────────────────────────────────────────────────────────────────
 def main():
     ap = argparse.ArgumentParser(
-        prog='jeom_fmt',
+        prog='formatter',
         description='점(Jeom) 언어 코드 포맷터 (JS 엔진으로 파싱)',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
