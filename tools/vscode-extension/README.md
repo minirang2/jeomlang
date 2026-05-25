@@ -1,4 +1,4 @@
-# <img src="assets/jeom-icon.svg" width="22" alt="JEOM" /> JEOM VS Code Runner
+# <img src="../assets/img/icon.png" width="22" alt="JEOM" /> JEOM VS Code Runner
 
 <p>
   <a href="README.md">📖 <strong>README</strong></a>
@@ -136,7 +136,7 @@ npm run update-jeom
 - `COMPATIBILITY.md`: 공식 CLI/엔진 호환 방식 설명
 - `syntaxes/jeom.tmLanguage.json`: 기본 TextMate 문법 하이라이트 정의
 - `language-configuration.json`: 주석, 괄호, 자동 닫기 설정
-- `assets/jeom-icon.svg`: JEOM 파일 아이콘
+- `../assets/img/icon.png`: JEOM 파일 아이콘 (외부 자산)
 - `package.json`: VS Code 확장 메타데이터
 
 ## 참고

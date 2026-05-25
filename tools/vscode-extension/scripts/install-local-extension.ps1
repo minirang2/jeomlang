@@ -23,11 +23,12 @@ $files = @(
 )
 
 $dirs = @(
-  "assets",
   "official",
   "snippets",
   "syntaxes"
 )
+
+$externalIcon = Join-Path $repoRoot "..\assets\img\icon.png"
 
 foreach ($installRoot in $InstallRoots) {
   if (-not (Test-Path $installRoot)) {
@@ -54,6 +55,14 @@ foreach ($installRoot in $InstallRoots) {
     $targetDir = Join-Path $target $dir
     New-Item -ItemType Directory -Force $targetDir | Out-Null
     Copy-Item -Path (Join-Path $sourceDir "*") -Destination $targetDir -Recurse -Force
+  }
+
+  $iconTargetDir = Join-Path $target "assets"
+  New-Item -ItemType Directory -Force $iconTargetDir | Out-Null
+  if (Test-Path $externalIcon) {
+    Copy-Item -LiteralPath $externalIcon -Destination (Join-Path $iconTargetDir "icon.png") -Force
+  } else {
+    Write-Host "Warning: external icon not found: $externalIcon"
   }
 
   $bundledCli = Join-Path $target "official\cli.js"

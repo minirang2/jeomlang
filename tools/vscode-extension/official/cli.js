@@ -1,132 +1,25 @@
 #!/usr/bin/env node
-
-/**
- * cli.js — 점(Jeom) 언어 Node.js CLI
- *
- * 사용법:
- *   node cli.js run <file.jeom>
- *   node cli.js check <file.jeom>
- *   node cli.js encode "문자열"
- *   node cli.js encode-num <숫자>
- *   node cli.js decode <점코드>
- *   node cli.js tokens <file.jeom>
- *   node cli.js repl
- *   node cli.js new <file.jeom>
- *   node cli.js version
- *   node cli.js ops
- */
-
-'use strict';
-
 const fs = require('fs');
 const path = require('path');
-const rl = require('readline');
 
-// engine.js 로드
-const enginePath = path.join(__dirname, 'engine.js');
-if (!fs.existsSync(enginePath)) {
-    console.error('오류: engine.js 를 찾을 수 없습니다. 같은 디렉터리에 있어야 합니다.');
-    process.exit(1);
-}
-const JeomEngine = require(enginePath);
-const {
-    encodeString,
-    encodeNumber,
-    decodeString,
-    decodeNumber,
-    tokenize,
-    parse,
-    JeomVM,
-    JeomError,
-    OP_TABLE,
-    VERSION,
-} = JeomEngine;
+// 깔끔한 래퍼: 먼저 요청하신 '../../core/cli.js' 경로를 우선 시도한 뒤, 다른 후보 경로를 시도합니다.
+const candidates = [
+  path.join(__dirname, '..', '..', 'core', 'cli.js'), // ../../core/cli.js
+  path.join(__dirname, '..', '..', '..', 'core', 'cli.js'), // ../../../core/cli.js
+  path.join(__dirname, '..', '..', '..', '..', 'core', 'cli.js')
+];
 
-// ── 색상 ──────────────────────────────────────────────────────────────────────
-const USE_COLOR = process.stdout.isTTY;
-const clr = (t, c) => USE_COLOR ? `\x1b[${c}m${t}\x1b[0m` : t;
-const bold = t => clr(t, '1');
-const red = t => clr(t, '31');
-const green = t => clr(t, '32');
-const yellow = t => clr(t, '33');
-const cyan = t => clr(t, '36');
-const gray = t => clr(t, '90');
-const magenta = t => clr(t, '35');
-
-// ── VM 팩토리 (Node.js 환경) ──────────────────────────────────────────────────
-function makeNodeVM(opts = {}) {
-    const searchPaths = opts.searchPaths || ['.'];
-
-    return new JeomVM({
-        stdout: s => process.stdout.write(s),
-        stderr: s => process.stderr.write(s),
-        stdin: () => new Promise(resolve => {
-            const iface = rl.createInterface({
-                input: process.stdin,
-                terminal: false
-            });
-            iface.once('line', line => {
-                iface.close();
-                resolve(line);
-            });
-            iface.once('close', () => resolve(''));
-        }),
-        readFile: async (filePath) => {
-            for (const sp of searchPaths) {
-                const full = path.isAbsolute(filePath) ?
-                    filePath :
-                    path.join(sp, filePath);
-                if (fs.existsSync(full)) return fs.readFileSync(full, 'utf8');
-            }
-            throw new JeomError(`파일 없음: '${filePath}'`);
-        },
-        writeFile: async (filePath, content) => {
-            fs.writeFileSync(filePath, content, 'utf8');
-        },
-        fileExists: async (filePath) => fs.existsSync(filePath),
-        deleteFile: async (filePath) => fs.unlinkSync(filePath),
-        listDir: async (dirPath) => fs.readdirSync(dirPath),
-        makeDir: async (dirPath) => fs.mkdirSync(dirPath, {
-            recursive: true
-        }),
-        execCmd: async (cmd) => {
-            const {
-                execSync
-            } = require('child_process');
-            try {
-                return execSync(cmd, {
-                    encoding: 'utf8',
-                    stdio: ['pipe', 'pipe', 'pipe']
-                });
-            } catch (e) {
-                return e.stdout || '';
-            }
-        },
-        getEnv: key => process.env[key] || '',
-        ...opts,
-    });
+let found = null;
+for (const c of candidates) {
+  try { if (fs.existsSync(c)) { found = c; break; } } catch (e) {}
 }
 
-// ── 실행 ──────────────────────────────────────────────────────────────────────
-async function cmdRun(filePath, opts = {}) {
-    if (!fs.existsSync(filePath)) {
-        console.error(red(`파일 없음: ${filePath}`));
-        process.exit(1);
-    }
-    const source = fs.readFileSync(filePath, 'utf8');
-    const dir = path.dirname(path.resolve(filePath));
-    const vm = makeNodeVM({
-        searchPaths: [dir, '.', ...(opts.include || [])]
-    });
-    try {
-        await vm.run(source);
-    } catch (e) {
-        if (e.exitCode !== undefined) process.exit(e.exitCode);
-        console.error(red(`[런타임 오류] ${e.message}`));
-        if (process.env.JEOM_DEBUG) console.error(e.stack);
-        process.exit(1);
-    }
+if (!found) {
+  console.error('오류: core/cli.js 를 찾을 수 없습니다. 시도한 경로: ' + candidates.join(', '));
+  process.exit(1);
 }
+
+require(found);
 
 // ── 문법 검사 ─────────────────────────────────────────────────────────────────
 function cmdCheck(filePath) {

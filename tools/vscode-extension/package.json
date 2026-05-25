@@ -16,6 +16,7 @@
   ],
   "main": "./extension.js",
   "scripts": {
+    "sync-assets": "node scripts/sync-assets.js",
     "update-jeom": "node scripts/update-official.js"
   },
   "activationEvents": [
@@ -43,8 +44,8 @@
         ],
         "configuration": "./language-configuration.json",
         "icon": {
-          "light": "./assets/jeom-icon.svg",
-          "dark": "./assets/jeom-icon.svg"
+          "light": "./assets/icon.png",
+          "dark": "./assets/icon.png"
         }
       }
     ],

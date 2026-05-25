@@ -6,3 +6,7 @@ test2.jeom
 # OS / editor
 .DS_Store
 Thumbs.db
+
+# Generated VS Code extension assets from external repo assets
+/assets/icon.png
+/official/assets
