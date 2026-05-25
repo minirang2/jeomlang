@@ -1,3 +1,19 @@
+## v1.5.1 - 2026-05-25
+
+## Updates
+
+- Integrated the jeomlang VS Code extension created by @captain34643875-wq.
+- Optimized and improved package.json configuration.
+- Fixed minor bugs.
+
+---
+
+## Package
+
+- Officially published the package to the npm registry.
+
+---
+
 ## v1.4.1 - 2026-05-17
 
 ## Updates
