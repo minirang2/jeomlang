@@ -1,0 +1,8 @@
+# Local scratch files
+test.jeom
+test2.jeom
+*.vsix
+
+# OS / editor
+.DS_Store
+Thumbs.db

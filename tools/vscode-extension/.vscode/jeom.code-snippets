@@ -1,0 +1,39 @@
+{
+  "JEOM main block": {
+    "scope": "jeom",
+    "prefix": "main",
+    "body": [
+      "\u2022\u00b7",
+      "  $0",
+      "\u22ee\u22ee"
+    ],
+    "description": "Create a JEOM main block"
+  },
+  "JEOM print line": {
+    "scope": "jeom",
+    "prefix": "println",
+    "body": [
+      "$1",
+      "\u00b7\u00b7"
+    ],
+    "description": "Print the top stack value with a newline"
+  },
+  "JEOM variable": {
+    "scope": "jeom",
+    "prefix": "var",
+    "body": [
+      "\u2218 ${1:name} ${2:value}"
+    ],
+    "description": "Set a variable"
+  },
+  "JEOM function": {
+    "scope": "jeom",
+    "prefix": "func",
+    "body": [
+      "\u02d9 ${1:name} ${2:arg}",
+      "  $0",
+      "\u22ee\u22ee"
+    ],
+    "description": "Create a JEOM function"
+  }
+}

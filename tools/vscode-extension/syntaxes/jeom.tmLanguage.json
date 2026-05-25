@@ -1,0 +1,93 @@
+{
+  "name": "JEOM",
+  "scopeName": "source.jeom",
+  "patterns": [
+    {
+      "name": "comment.line.jeom",
+      "match": "\u25d8.*$"
+    },
+    {
+      "name": "keyword.control.main.jeom",
+      "match": "\u2022\u00b7"
+    },
+    {
+      "name": "keyword.control.end.jeom",
+      "match": "\u22ee\u22ee"
+    },
+    {
+      "name": "string.quoted.jeom",
+      "begin": "\u25cf",
+      "end": "\u25cf",
+      "patterns": [
+        {
+          "name": "constant.character.binary.jeom",
+          "match": "[.\u00b7]{8}"
+        },
+        {
+          "name": "punctuation.separator.byte.jeom",
+          "match": "\u2027"
+        }
+      ]
+    },
+    {
+      "name": "constant.numeric.jeom",
+      "match": "\u2022[.\u00b7\u2025]+\u2022"
+    },
+    {
+      "name": "keyword.control.jeom",
+      "match": "\u2026\u00b7|\u2026\u2025|\u2026|\u2025\u00b7\u00b7|\u2025\u00b7\u02d9|\u2025\u00b7\u2218|\u2025\u00b7\u2981|\u2025\u00b7|\u2025\u2025|\u2025\u2218\u2218|\u2025\u2218|\u2025"
+    },
+    {
+      "name": "storage.type.function.jeom",
+      "match": "\u02d9\u02d9\u02d9|\u02d9\u02d9|\u02d9\u2218\u2218|\u02d9\u2218|\u02d9"
+    },
+    {
+      "name": "storage.modifier.variable.jeom",
+      "match": "\u2218\u2218\u2218|\u2218\u2218|\u2218"
+    },
+    {
+      "name": "support.function.io.jeom",
+      "match": "\u00b7\u02d9\u02d9|\u00b7\u02d9|\u00b7\u2218|\u00b7\u2981|\u00b7\u00b7|\u00b7"
+    },
+    {
+      "name": "keyword.operator.arithmetic.jeom",
+      "match": "\u22c5\u2218\u2218\u2218|\u22c5\u2218\u2218|\u22c5\u2218|\u22c5\u22c5\u22c5|\u22c5\u22c5|\u22c5"
+    },
+    {
+      "name": "keyword.operator.comparison.jeom",
+      "match": "\u22c5\u2027\u2218\u2218\u2218|\u22c5\u2027\u2218\u2218|\u22c5\u2027\u2218|\u22c5\u2027\u2027\u2027|\u22c5\u2027\u2027|\u22c5\u2027"
+    },
+    {
+      "name": "keyword.operator.logical.jeom",
+      "match": "\u22c5\u2981\u2218|\u22c5\u2981\u2981\u2981|\u22c5\u2981\u2981|\u22c5\u2981"
+    },
+    {
+      "name": "support.function.type.jeom",
+      "match": "\u2e33\u2e33\u2e33|\u2e33\u2e33|\u2e33\u2218|\u2e33\u2981|\u2e33\u22c5|\u2e33\u2027|\u2e33"
+    },
+    {
+      "name": "support.function.stack.jeom",
+      "match": "\u2981\u2218\u2981|\u2981\u2981\u2981|\u2981\u2981|\u2981\u2218|\u2981"
+    },
+    {
+      "name": "support.function.collection.jeom",
+      "match": "\u25e6\u22c5\u22c5\u22c5|\u25e6\u2027\u2027\u2027|\u25e6\u2218\u2218|\u25e6\u2981\u2981|\u25e6\u25e6\u25e6|\u25e6\u22c5\u22c5|\u25e6\u2027\u2027|\u25e6\u2218|\u25e6\u2981|\u25e6\u22c5|\u25e6\u2027|\u25e6\u25e6|\u25e6"
+    },
+    {
+      "name": "support.function.filesystem.jeom",
+      "match": "\u22ef\u00b7\u2981\u2981|\u22ef\u00b7\u2981|\u22ef\u00b7\u02d9|\u22ef\u22ef\u22ef|\u22ef\u2218\u2218|\u22ef\u2981\u2981|\u22ef\u22ef|\u22ef\u2218|\u22ef\u2981|\u22ef\u22c5|\u22ef\u2027|\u22ef\u00b7|\u22ef"
+    },
+    {
+      "name": "support.function.system.jeom",
+      "match": "\u22ee\u00b7\u00b7|\u22ee\u00b7\u2218|\u22ee\u00b7\u2981|\u22ee\u2027\u2027\u2027|\u22ee\u2027\u2027|\u22ee\u2218\u2218|\u22ee\u00b7|\u22ee\u2218|\u22ee\u2981|\u22ee\u22c5|\u22ee\u2027"
+    },
+    {
+      "name": "punctuation.dot.leader.jeom",
+      "match": "\u2024"
+    },
+    {
+      "name": "entity.name.variable.jeom",
+      "match": "[^\\s\u25d8\u2022\u25cf\u00b7\u02d9\u2025\u2026\u2218\u22c5\u2981\u2e33\u25e6\u22ef\u22ee]+"
+    }
+  ]
+}
