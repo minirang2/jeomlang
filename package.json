@@ -6,12 +6,26 @@
   "bin": {
     "jeom": "core/cli.js"
   },
+  "files": [
+    "core/",
+    "stdlib/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node core/cli.js repl",
     "cli": "node core/cli.js"
   },
-  "keywords": ["esoteric", "language", "unicode", "interpreter", "jeom", "점"],
+  "keywords": [
+    "esolang",
+    "esoteric",
+    "language",
+    "unicode",
+    "interpreter",
+    "jeom",
+    "점"
+  ],
   "author": "minirang",
   "license": "ISC",
   "repository": {
