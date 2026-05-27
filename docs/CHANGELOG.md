@@ -1,3 +1,12 @@
+## v1.5.2 - 2026-05-27
+
+## Updates
+
+- Deleted unnecessary files of vscode extension.
+- Updated grammar.md
+
+---
+
 ## v1.5.1 - 2026-05-25
 
 ## Updates
