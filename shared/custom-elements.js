@@ -1,4 +1,4 @@
-const VERSION = "v1.4.1";
+const VERSION = "v1.5.2";
 
 class JeomVersion extends HTMLElement {
   connectedCallback() {
