@@ -9,7 +9,8 @@
   <a href="https://jeomlang.vercel.app/ide">Web IDE</a> ·
   <a href="docs/GRAMMAR.md">Grammar Reference</a> ·
   <a href="docs/SPEC.md">Language Specification</a> ·
-  <a href="docs/CHANGELOG.md">Changelog</a>
+  <a href="docs/CHANGELOG.md">Changelog</a> · 
+  <a href="README.md">Korean README</a>
 </p>
 
 <p align="center">
