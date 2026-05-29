@@ -1,4 +1,4 @@
-# jeomlang 점랭
+# JeomLang (점랭)
 
 <p align="center">
   <img src="assets/img/logo_animated.svg" alt="Jeom Logo" width="96">
