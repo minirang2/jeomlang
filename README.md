@@ -268,4 +268,4 @@ Apache License 2.0 — <LICENSE>
 
 ## 언어 이름 유의사항
 
-jeomlang, jeom, JeomLang 세가지만이 점랭을 나타내는 밀입니다.
+jeomlang, jeom, JeomLang 세가지만이 점랭을 나타내는 말입니다.
