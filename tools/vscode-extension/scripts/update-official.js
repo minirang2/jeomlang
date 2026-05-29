@@ -10,18 +10,18 @@ const OFFICIAL_DIR = path.join(__dirname, '..', 'official');
 const VERSION_FILE = path.join(OFFICIAL_DIR, '.version');
 
 const FILES = [
-  {
-    name: 'cli.js',
-    url: 'https://jeomlang.vercel.app/core/cli.js'
-  },
-  {
-    name: 'engine.js',
-    url: 'https://jeomlang.vercel.app/core/engine.js'
-  },
-  {
-    name: 'std.jeom',
-    url: 'https://jeomlang.vercel.app/stdlib/std.jeom'
-  }
+  { name: 'cli.js', localPaths: [
+      path.join(__dirname, '..', '..', 'core', 'cli.js'),
+      path.join(__dirname, '..', '..', '..', 'core', 'cli.js')
+    ], url: 'https://jeomlang.vercel.app/core/cli.js' },
+  { name: 'engine.js', localPaths: [
+      path.join(__dirname, '..', '..', 'core', 'engine.js'),
+      path.join(__dirname, '..', '..', '..', 'core', 'engine.js')
+    ], url: 'https://jeomlang.vercel.app/core/engine.js' },
+  { name: 'std.jeom', localPaths: [
+      path.join(__dirname, '..', '..', 'stdlib', 'std.jeom'),
+      path.join(__dirname, '..', '..', '..', 'stdlib', 'std.jeom')
+    ], url: 'https://jeomlang.vercel.app/stdlib/std.jeom' }
 ];
 
 function downloadFile(url, filepath) {
@@ -57,6 +57,20 @@ async function updateOfficialFiles() {
 
   for (const file of FILES) {
     const filepath = path.join(OFFICIAL_DIR, file.name);
+    // 우선 로컬 core/ 또는 stdlib/에서 복사 시도
+    let copied = false;
+    if (file.localPaths) {
+      for (const lp of file.localPaths) {
+        if (fs.existsSync(lp)) {
+          fs.copyFileSync(lp, filepath);
+          console.log(`📁 ${file.name} 복사 완료 (로컬): ${lp}`);
+          copied = true; break;
+        }
+      }
+    }
+    if (copied) continue;
+
+    // 로컬에 없으면 원격에서 다운로드
     try {
       console.log(`⬇️  ${file.name} 다운로드 중...`);
       await downloadFile(file.url, filepath);
