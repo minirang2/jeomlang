@@ -10,6 +10,7 @@
     "core/",
     "stdlib/",
     "README.md",
+    "README_en.md",
     "LICENSE"
   ],
   "scripts": {
@@ -23,6 +24,7 @@
     "language",
     "unicode",
     "interpreter",
+    "jeomlang",
     "jeom",
     "점"
   ],
