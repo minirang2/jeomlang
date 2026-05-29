@@ -1,4 +1,4 @@
-# jeomlang 점랭 언어 명세서
+# 점랭(jeomlang) 언어 명세서
 
 > 작성자: minirang  
 > 최종 수정: 2026/5/29
