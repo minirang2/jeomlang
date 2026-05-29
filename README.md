@@ -268,4 +268,4 @@ Apache License 2.0
 
 ## 언어 이름 유의사항
 
-jeomlang, jeom, JeomLang 세가지만이 점랭을 나타내는 말입니다.
+jeomlang, jeom, JeomLang, 점랭 만이 이 언어를 나타내는 말입니다.
