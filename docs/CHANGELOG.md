@@ -1,3 +1,11 @@
+## v1.5.4 - 2026-05-29
+
+## Updates
+
+- Created README_en.md
+
+---
+
 ## v1.5.3 - 2026-05-29
 
 ## Updates
