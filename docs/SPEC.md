@@ -424,4 +424,4 @@ const {
 
 -----
 
-- jeomlang 언어 명세서 끝 -
+jeomlang 언어 명세서 끝
