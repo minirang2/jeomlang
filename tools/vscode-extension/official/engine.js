@@ -1,30 +1,435 @@
-// official/engine.js는 core/engine.js로 위임합니다.
-const fs = require('fs');
-const path = require('path');
-
-const candidates = [
-  #!/usr/bin/env node
-  const fs = require('fs');
-  const path = require('path');
-
-  // 간단한 래퍼: 우선 '../../core/engine.js'를 시도하고 실패하면 '../../../core/engine.js'를 시도합니다.
-  const candidates = [
-    path.join(__dirname, '..', '..', 'core', 'engine.js'),
-    path.join(__dirname, '..', '..', '..', 'core', 'engine.js'),
-    path.join(__dirname, '..', '..', '..', '..', 'core', 'engine.js')
-  ];
-
-  let found = null;
-  for (const c of candidates) {
-    try { if (fs.existsSync(c)) { found = c; break; } } catch (e) {}
+(function (root, factory) {
+  'use strict';
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.JeomEngine = factory();
   }
-
-  if (!found) {
-    console.error('오류: core/engine.js 를 찾을 수 없습니다. 시도한 경로: ' + candidates.join(', '));
-    throw new Error('core/engine.js not found');
+}(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  var VERSION = '1.1.0';
+  var DOT_CHARS = new Set([
+    '\u002E','\u00B7','\u02D9','\u2022','\u2024','\u2025',
+    '\u2026','\u2027','\u2218','\u22C5','\u25CF','\u25E6',
+    '\u2981','\u2E33','\u22EE','\u22EF','\u25D8',
+  ]);
+  var C = {
+    COMMENT:   '\u25D8',
+    NUM_DELIM: '\u2022',
+    STR_DELIM: '\u25CF',
+    ZERO:      '\u002E',
+    ONE:       '\u00B7',
+    BYTE_SEP:  '\u2027',
+    FLOAT_SEP: '\u2025',
+    MAIN_RAW:  '\u2022\u00B7',
+    SPACE:     new Set([' ','\t','\n','\r','\f','\v']),
+  };
+  var OP_TABLE = {
+    '\u2218':'\u0056\u0041\u0052',
+    '\u2218\u2218':'GET',
+    '\u2218\u2218\u2218':'DEL',
+    '\u2218\u22C5':'STORE',
+    '\u2981':'PUSH_CMD',
+    '\u2981\u2981':'POP_CMD',
+    '\u2981\u2218':'PEEK',
+    '\u2981\u2981\u2981':'SWAP',
+    '\u2981\u2218\u2981':'DUP',
+    '\u22C5':'ADD',
+    '\u22C5\u22C5':'SUB',
+    '\u22C5\u22C5\u22C5':'MUL',
+    '\u22C5\u2218':'DIV',
+    '\u22C5\u2218\u2218':'MOD',
+    '\u22C5\u2218\u2218\u2218':'POW',
+    '\u22C5\u2981':'AND',
+    '\u22C5\u2981\u2981':'OR',
+    '\u22C5\u2981\u2981\u2981':'NOT',
+    '\u22C5\u2981\u2218':'XOR',
+    '\u22C5\u2027':'EQ',
+    '\u22C5\u2027\u2027':'NEQ',
+    '\u22C5\u2027\u2027\u2027':'LT',
+    '\u22C5\u2027\u2218':'GT',
+    '\u22C5\u2027\u2218\u2218':'LTE',
+    '\u22C5\u2027\u2218\u2218\u2218':'GTE',
+    '\u2026':'IF',
+    '\u2026\u00B7':'ELSE',
+    '\u2026\u2025':'ELIF',
+    '\u2025':'LOOP',
+    '\u2025\u2025':'WHILE',
+    '\u2025\u2218':'BREAK',
+    '\u2025\u2218\u2218':'CONT',
+    '\u22EE':'BLOCK',
+    '\u22EE\u22EE':'END',
+    '\u22EF':'GOTO',
+    '\u22EF\u00B7':'LABEL',
+    '\u02D9':'FUNC',
+    '\u02D9\u02D9':'RET',
+    '\u02D9\u02D9\u02D9':'CALL',
+    '\u02D9\u2218':'ARG',
+    '\u02D9\u2218\u2218':'ARGC',
+    '\u02D9\u2981':'LAMBDA',
+    '\u02D9\u22C5':'CURRY',
+    '\u00B7':'PRINT',
+    '\u00B7\u00B7':'PRINTLN',
+    '\u00B7\u02D9':'INPUT',
+    '\u00B7\u02D9\u02D9':'INPUTN',
+    '\u00B7\u2218':'ERR',
+    '\u00B7\u2981':'FMT',
+    '\u2E33':'INT',
+    '\u2E33\u2E33':'FLOAT',
+    '\u2E33\u2E33\u2E33':'STR',
+    '\u2E33\u2218':'BOOL',
+    '\u2E33\u2981':'TYPE',
+    '\u2E33\u22C5':'CAST',
+    '\u2E33\u2027':'LEN',
+    '\u25E6':'ARR',
+    '\u25E6\u25E6':'IDX',
+    '\u25E6\u25E6\u25E6':'IDXS',
+    '\u25E6\u2218':'APP',
+    '\u25E6\u2218\u2218':'SLICE',
+    '\u25E6\u2981':'KEYS',
+    '\u25E6\u2981\u2981':'VALS',
+    '\u25E6\u22C5':'MAP',
+    '\u25E6\u22C5\u22C5':'FILTER',
+    '\u25E6\u22C5\u22C5\u22C5':'REDUCE',
+    '\u25E6\u2027':'DICT',
+    '\u25E6\u2027\u2027':'DGET',
+    '\u25E6\u2027\u2027\u2027':'DSET',
+    '\u2025\u00B7':'TRY',
+    '\u2025\u00B7\u00B7':'CATCH',
+    '\u2025\u00B7\u02D9':'FINALLY',
+    '\u2025\u00B7\u2218':'THROW',
+    '\u2025\u00B7\u2981':'ASSERT',
+    '\u22EF\u22EF':'FOPEN',
+    '\u22EF\u22EF\u22EF':'FREAD',
+    '\u22EF\u2218':'FWRITE',
+    '\u22EF\u2218\u2218':'FCLOSE',
+    '\u22EF\u2981':'FEXIST',
+    '\u22EF\u2981\u2981':'FDELETE',
+    '\u22EF\u22C5':'FLIST',
+    '\u22EF\u2027':'MKDIR',
+    '\u22EF\u00B7\u2981':'IMPORT',
+    '\u22EF\u00B7\u2981\u2981':'FROM',
+    '\u22EF\u00B7\u02D9':'EXPORT',
+    '\u22EE\u00B7':'EVAL',
+    '\u22EE\u00B7\u00B7':'EXEC',
+    '\u22EE\u00B7\u2218':'ENV',
+    '\u22EE\u00B7\u2981':'SLEEP',
+    '\u22EE\u2218':'EXIT',
+    '\u22EE\u2218\u2218':'NOOP',
+    '\u22EE\u2981':'DEBUG',
+    '\u22EE\u22C5':'TIME',
+    '\u22EE\u2027':'RAND',
+    '\u22EE\u2027\u2027':'HASH',
+    '\u22EE\u2027\u2027\u2027':'REGEX',
+  };
+  OP_TABLE['\u2218'] = 'VAR';
+  function JeomError(msg)  { this.message = msg; this.name = 'JeomError'; }
+  function JeomBreak()     { this.name = 'JeomBreak'; }
+  function JeomContinue()  { this.name = 'JeomContinue'; }
+  function JeomReturn(val) { this.name = 'JeomReturn'; this.value = val; }
+  function JeomGoto(lbl)   { this.name = 'JeomGoto';   this.label = lbl; }
+  function JeomExit(code)  { this.name = 'JeomExit';   this.exitCode = code; }
+  JeomError.prototype = Object.create(Error.prototype);
+  function encodeString(s) {
+    var bytes = (typeof TextEncoder !== 'undefined')
+      ? Array.from(new TextEncoder().encode(s))
+      : Array.from(Buffer.from(s, 'utf8'));
+    return C.STR_DELIM +
+      bytes.map(function(b){ return b.toString(2).padStart(8,'0').replace(/0/g,C.ZERO).replace(/1/g,C.ONE); })
+           .join(C.BYTE_SEP) +
+      C.STR_DELIM;
   }
-
-  module.exports = require(found);
+  function encodeNumber(n) {
+    n = Math.trunc(n);
+    if (n === 0) return C.NUM_DELIM + C.NUM_DELIM;
+    return C.NUM_DELIM + Math.abs(n).toString(2).replace(/0/g,C.ZERO).replace(/1/g,C.ONE) + C.NUM_DELIM;
+  }
+  function encodeFloat(n) {
+    if (!isFinite(n)) throw new JeomError('encodeFloat: 유한수만 지원합니다');
+    var neg = n < 0; n = Math.abs(n);
+    var intPart = Math.floor(n);
+    var fracPart = n - intPart;
+    var intBits = intPart === 0 ? [] : intPart.toString(2).split('').map(Number);
+    var fracBits = [];
+    var f = fracPart;
+    for (var i = 0; i < 24; i++) {
+      f *= 2;
+      fracBits.push(Math.floor(f));
+      f -= Math.floor(f);
+      if (f === 0) break;
+    }
+    var b2d = function(arr){ return arr.map(function(x){return x?C.ONE:C.ZERO;}).join(''); };
+    return C.NUM_DELIM + b2d(intBits) + C.FLOAT_SEP + b2d(fracBits) + C.NUM_DELIM;
+  }
+  function decodeString(s) {
+    s = (s||'').trim();
+    if (!s.startsWith(C.STR_DELIM)||!s.endsWith(C.STR_DELIM)) return null;
+    var inner = s.slice(1,-1).replace(/\s/g,'');
+    if (!inner) return '';
+    var bytes = inner.split(C.BYTE_SEP)
+      .filter(function(b){ return b.length===8; })
+      .map(function(b){ return parseInt(b.replace(/\./g,'0').replace(/·/g,'1'),2); });
+    return (typeof TextDecoder!=='undefined')
+      ? new TextDecoder().decode(new Uint8Array(bytes))
+      : Buffer.from(bytes).toString('utf8');
+  }
+  function decodeNumber(s) {
+    s = (s||'').trim();
+    if (!s.startsWith(C.NUM_DELIM)||!s.endsWith(C.NUM_DELIM)) return null;
+    var inner = s.slice(1,-1);
+    if (!inner) return 0;
+    var fpIdx = inner.indexOf(C.FLOAT_SEP);
+    if (fpIdx === -1) {
+      return parseInt(inner.replace(/\./g,'0').replace(/·/g,'1'),2);
+    }
+    var intStr  = inner.slice(0, fpIdx);
+    var fracStr = inner.slice(fpIdx + 1);
+    var intVal  = intStr  ? parseInt(intStr.replace(/\./g,'0').replace(/·/g,'1'),2) : 0;
+    var fracVal = fracStr ? fracStr.split('').reduce(function(acc,b,i){
+      return acc + (b===C.ONE?1:0) * Math.pow(2,-(i+1));
+    },0) : 0;
+    return intVal + fracVal;
+  }
+  function tokenize(source) {
+    var tokens = [];
+    var pos = 0, line = 1, col = 1;
+    function peek(o){ return source[pos+(o||0)]; }
+    function adv(){
+      var ch=source[pos++];
+      if(ch==='\n'){line++;col=1;}else{col++;}
+      return ch;
+    }
+    function skipWS(){
+      while(pos<source.length){
+        var ch=source[pos];
+        if(C.SPACE.has(ch)){adv();}
+        else if(ch===C.COMMENT){while(pos<source.length&&source[pos]!=='\n')adv();}
+        else break;
+      }
+    }
+    function readNumber(sl,sc){
+      var raw=C.NUM_DELIM, bits=[], fpIdx=null;
+      while(pos<source.length){
+        var ch=source[pos];
+        if(ch===C.NUM_DELIM){raw+=adv();break;}
+        else if(ch===C.ZERO){bits.push(0);raw+=adv();}
+        else if(ch===C.ONE){bits.push(1);raw+=adv();}
+        else if(ch===C.FLOAT_SEP){
+          if(fpIdx!==null) throw new JeomError('L'+sl+': 소수점 중복');
+          fpIdx=bits.length; raw+=adv();
+        }
+        else if(C.SPACE.has(ch)) throw new JeomError('L'+sl+': 숫자 내 공백 불가');
+        else throw new JeomError('L'+sl+':C'+col+': 숫자 내 허용안되는 문자 \''+ch+'\'');
+      }
+      if(!bits.length) return {type:'NUMBER',value:0,raw:raw,line:sl,col:sc};
+      if(fpIdx!==null){
+        var iv=bits.slice(0,fpIdx).reduce(function(a,b){return a*2+b;},0);
+        var fv=bits.slice(fpIdx).reduce(function(a,b,i){return a+b*Math.pow(2,-(i+1));},0);
+        return {type:'NUMBER',value:iv+fv,raw:raw,line:sl,col:sc};
+      }
+      return {type:'NUMBER',value:parseInt(bits.join(''),2),raw:raw,line:sl,col:sc};
+    }
+    function readString(sl,sc){
+      var raw=C.STR_DELIM, cur=[], bytes=[];
+      while(pos<source.length){
+        var ch=source[pos];
+        if(ch===C.STR_DELIM){raw+=adv();break;}
+        else if(ch===C.ZERO){cur.push(0);raw+=adv();}
+        else if(ch===C.ONE){cur.push(1);raw+=adv();}
+        else if(ch===C.BYTE_SEP){
+          raw+=adv();
+          if(cur.length){
+            if(cur.length!==8) throw new JeomError('L'+sl+': 문자열 바이트가 8비트가 아님('+cur.length+')');
+            bytes.push(parseInt(cur.join(''),2)); cur=[];
+          }
+        }
+        else if(C.SPACE.has(ch)){adv();}
+        else throw new JeomError('L'+sl+':C'+col+': 문자열 내 허용안되는 문자 \''+ch+'\'');
+      }
+      if(cur.length===8) bytes.push(parseInt(cur.join(''),2));
+      else if(cur.length>0) throw new JeomError('L'+sl+': 마지막 바이트가 8비트 아님('+cur.length+')');
+      var value=(typeof TextDecoder!=='undefined')
+        ? new TextDecoder().decode(new Uint8Array(bytes))
+        : Buffer.from(bytes).toString('utf8');
+      return {type:'STRING',value:value,raw:raw,line:sl,col:sc};
+    }
+    while(pos<source.length){
+      skipWS();
+      if(pos>=source.length) break;
+      var ch=source[pos], sl=line, sc=col;
+      if(!DOT_CHARS.has(ch))
+        throw new JeomError('L'+sl+':C'+sc+': 허용안되는 문자 \''+ch+'\' (U+'+ch.codePointAt(0).toString(16).toUpperCase().padStart(4,'0')+')');
+      if(ch===C.NUM_DELIM){
+        var nx=peek(1), afx=peek(2);
+        if(nx===C.ONE&&(!afx||C.SPACE.has(afx)||afx===C.COMMENT)){
+          adv();adv();
+          tokens.push({type:'NUMBER',value:1,raw:C.MAIN_RAW,line:sl,col:sc});
+        } else {
+          adv();
+          tokens.push(readNumber(sl,sc));
+        }
+      } else if(ch===C.STR_DELIM){
+        adv();
+        tokens.push(readString(sl,sc));
+      } else {
+        var raw='';
+        while(pos<source.length){
+          var cc=source[pos];
+          if(C.SPACE.has(cc)||cc===C.COMMENT) break;
+          if(!DOT_CHARS.has(cc)) throw new JeomError('L'+line+':C'+col+': 허용안되는 문자 \''+cc+'\'');
+          raw+=adv();
+        }
+        if(raw) tokens.push({type:'OP',value:raw,raw:raw,line:sl,col:sc});
+      }
+    }
+    tokens.push({type:'EOF',value:null,raw:'',line:line,col:col});
+    return tokens;
+  }
+  function parse(tokens){
+    var pos=0;
+    function peek(o){return tokens[pos+(o||0)]||{type:'EOF'};}
+    function adv(){return tokens[pos++]||{type:'EOF'};}
+    function opName(t){return t.type==='OP'?(OP_TABLE[t.raw]||null):null;}
+    function isMain(){var t=peek();return t.type==='NUMBER'&&t.raw===C.MAIN_RAW;}
+    function isEnd(){var o=opName(peek());return o==='END'||o==='ELSE'||o==='ELIF'||o==='CATCH'||o==='FINALLY';}
+    function readName(){
+      var t=adv();
+      if(t.type!=='OP') throw new JeomError('L'+t.line+': 이름 기대, 받음: '+t.type+'(\''+t.raw+'\')');
+      return t.raw;
+    }
+    function parseBody(){
+      var s=[];
+      while(peek().type!=='EOF'&&!isEnd()&&!isMain()){var st=parseStmt();if(st)s.push(st);}
+      return s;
+    }
+    function parseBlock(){
+      if(opName(peek())!=='BLOCK') throw new JeomError('L'+peek().line+': ⋮ 기대, 받음: \''+peek().raw+'\'');
+      adv();
+      var b=parseBody();
+      if(opName(peek())==='END') adv();
+      return b;
+    }
+    function parseVal(){
+      var t=peek();
+      if(t.type==='NUMBER'){adv();return {type:'NUM_LIT',value:t.value};}
+      if(t.type==='STRING'){adv();return {type:'STR_LIT',value:t.value};}
+      var o=opName(t);
+      if(o==='GET'){adv();return {type:'GETVAR',name:readName()};}
+      if(t.type==='OP'){return {type:'NAME',raw:adv().raw};}
+      throw new JeomError('L'+t.line+': 값 표현식 기대');
+    }
+    function parseFuncDef(){
+      var ln=peek().line; adv();
+      var name=readName(), args=[];
+      while(opName(peek())==='ARG'){adv();args.push(readName());}
+      return {type:'FUNCDEF',name:name,args:args,body:parseBlock(),line:ln};
+    }
+    function parseLambda(){
+      var ln=peek().line; adv();
+      var args=[];
+      while(opName(peek())==='ARG'){adv();args.push(readName());}
+      return {type:'LAMBDA',args:args,body:parseBlock(),line:ln};
+    }
+    function parseIf(){
+      var ln=peek().line; adv();
+      var then=parseBlock(), elifs=[], els=null;
+      while(opName(peek())==='ELIF'){adv();var c=parseBlock(),b=parseBlock();elifs.push({cond:c,body:b});}
+      if(opName(peek())==='ELSE'){adv();els=parseBlock();}
+      return {type:'IF',thenBody:then,elifBranches:elifs,elseBody:els,line:ln};
+    }
+    function parseWhile(){
+      var ln=peek().line; adv();
+      return {type:'WHILE',condBody:parseBlock(),body:parseBlock(),line:ln};
+    }
+    function parseTry(){
+      var ln=peek().line; adv();
+      var tb=parseBlock(),cb=null,fb=null;
+      if(opName(peek())==='CATCH'){adv();cb=parseBlock();}
+      if(opName(peek())==='FINALLY'){adv();fb=parseBlock();}
+      return {type:'TRY',tryBody:tb,catchBody:cb,finallyBody:fb,line:ln};
+    }
+    function parseMain(){
+      adv();
+      var b=parseBody();
+      if(opName(peek())==='END') adv();
+      return {type:'MAIN',body:b};
+    }
+    function parseStmt(){
+      var t=peek(), ln=t.line, op=opName(t);
+      if(isMain()) return parseMain();
+      if(t.type==='NUMBER'){adv();return {type:'PUSH',expr:{type:'NUM_LIT',value:t.value},line:ln};}
+      if(t.type==='STRING'){adv();return {type:'PUSH',expr:{type:'STR_LIT',value:t.value},line:ln};}
+      if(t.type==='EOF') return null;
+      if(!op) return {type:'GETVAR',name:adv().raw,line:ln};
+      switch(op){
+        case 'VAR':      {adv();var nm=readName();return {type:'VARSET',name:nm,expr:parseVal(),line:ln};}
+        case 'GET':      {adv();return {type:'GETVAR',name:readName(),line:ln};}
+        case 'DEL':      {adv();return {type:'DELVAR',name:readName(),line:ln};}
+        case 'STORE':    {adv();return {type:'STORE', name:readName(),line:ln};}
+        case 'PUSH_CMD': {adv();return {type:'PUSH',  expr:parseVal(), line:ln};}
+        case 'FUNC':     return parseFuncDef();
+        case 'LAMBDA':   return parseLambda();
+        case 'CALL':     {adv();return {type:'CALL',name:readName(),line:ln};}
+        case 'IF':       return parseIf();
+        case 'LOOP':     {adv();return {type:'LOOP',body:parseBlock(),line:ln};}
+        case 'WHILE':    return parseWhile();
+        case 'TRY':      return parseTry();
+        case 'THROW':    {adv();return {type:'THROW',line:ln};}
+        case 'ASSERT':   {adv();return {type:'INSTR',op:'ASSERT',line:ln};}
+        case 'LABEL':    {adv();return {type:'LABEL',name:readName(),line:ln};}
+        case 'GOTO':     {adv();return {type:'GOTO', name:readName(),line:ln};}
+        case 'IMPORT':   {adv();return {type:'IMPORT',line:ln};}
+        case 'FROM':     {adv();return {type:'IMPORT',line:ln};}
+        case 'EXPORT':   {adv();return {type:'EXPORT',name:readName(),line:ln};}
+        case 'BLOCK':{
+          adv();var bb=parseBody();
+          if(opName(peek())==='END') adv();
+          return {type:'BLOCK',body:bb,line:ln};
+        }
+        default: adv(); return {type:'INSTR',op:op,line:ln};
+      }
+    }
+    var stmts=[];
+    while(peek().type!=='EOF'){var s=parseStmt();if(s)stmts.push(s);}
+    return stmts;
+  }
+  function JeomVM(opts){
+    opts=opts||{};
+    this.stdout     =opts.stdout     ||function(){};
+    this.stderr     =opts.stderr     ||function(){};
+    this.stdin      =opts.stdin      ||function(){return Promise.resolve('');};
+    this.readFile   =opts.readFile   ||function(){return Promise.reject(new JeomError('파일읽기 미지원'));};
+    this.writeFile  =opts.writeFile  ||function(){return Promise.reject(new JeomError('파일쓰기 미지원'));};
+    this.fileExists =opts.fileExists ||function(){return Promise.resolve(false);};
+    this.deleteFile =opts.deleteFile ||function(){return Promise.reject(new JeomError('삭제 미지원'));};
+    this.listDir    =opts.listDir    ||function(){return Promise.resolve([]);};
+    this.makeDir    =opts.makeDir    ||function(){return Promise.reject(new JeomError('mkdir 미지원'));};
+    this.execCmd    =opts.execCmd    ||function(){return Promise.reject(new JeomError('exec 미지원'));};
+    this.getEnv     =opts.getEnv     ||function(){return '';};
+    this.maxSteps     =opts.maxSteps     ||2000000;
+    this.maxCallDepth =opts.maxCallDepth ||500;
+    this.maxLoop      =opts.maxLoop      ||100000;
+    this.stack=[]; this.env={}; this.functions={}; this.modules={};
+    this.callDepth=0; this.stepCount=0;
+  }
+  JeomVM.prototype.run = async function(source){
+    this.stepCount=0;
+    var toks=tokenize(source), stmts=parse(toks);
+    for(var i=0;i<stmts.length;i++) if(stmts[i].type==='FUNCDEF') this._regFunc(stmts[i]);
+    var main=null;
+    for(var j=0;j<stmts.length;j++) if(stmts[j].type==='MAIN'){main=stmts[j];break;}
+    if(!main) throw new JeomError('main 블록(•·...⋮⋮)이 없습니다');
+    await this._execList(main.body);
+  };
+  JeomVM.prototype._push=function(v){this.stack.push(v);};
+  JeomVM.prototype._pop=function(){
+    if(!this.stack.length) throw new JeomError('스택 언더플로우');
+    return this.stack.pop();
+  };
+  JeomVM.prototype._peek=function(){
+    if(!this.stack.length) throw new JeomError('스택이 비어있음');
+    return this.stack[this.stack.length-1];
+  };
   JeomVM.prototype._setVar=function(n,v){this.env[n]=v;};
   JeomVM.prototype._getVar=function(n){
     if(Object.prototype.hasOwnProperty.call(this.env,n)) return this.env[n];
@@ -34,7 +439,6 @@ const candidates = [
     var fn={args:node.args,body:node.body,closure:Object.assign({},this.env),_isFunc:true};
     this.functions[node.name]=fn; this.env[node.name]=fn;
   };
-
   JeomVM.prototype._execList=async function(stmts){
     var i=0;
     while(i<stmts.length){
@@ -55,7 +459,6 @@ const candidates = [
       i++;
     }
   };
-
   JeomVM.prototype._exec=async function(node){
     if(!node) return;
     if(Array.isArray(node)){await this._execList(node);return;}
@@ -87,7 +490,6 @@ const candidates = [
       default: throw new JeomError('알 수 없는 노드: \''+node.type+'\'');
     }
   };
-
   JeomVM.prototype._eval=async function(node){
     switch(node.type){
       case 'NUM_LIT': return node.value;
@@ -97,7 +499,6 @@ const candidates = [
       default: await this._exec(node); return this._pop();
     }
   };
-
   JeomVM.prototype._execIf=async function(node){
     var cond=this._pop();
     if(this._truthy(cond)){await this._execList(node.thenBody);return;}
@@ -107,7 +508,6 @@ const candidates = [
     }
     if(node.elseBody) await this._execList(node.elseBody);
   };
-
   JeomVM.prototype._execLoop=async function(node){
     var count=Math.max(0,Math.floor(this._num(this._pop())));
     for(var i=0;i<count;i++){
@@ -119,7 +519,6 @@ const candidates = [
       }
     }
   };
-
   JeomVM.prototype._execWhile=async function(node){
     var guard=0;
     while(true){
@@ -134,7 +533,6 @@ const candidates = [
       }
     }
   };
-
   JeomVM.prototype._execTry=async function(node){
     try{await this._execList(node.tryBody);}
     catch(e){
@@ -145,13 +543,11 @@ const candidates = [
       if(node.finallyBody) await this._execList(node.finallyBody);
     }
   };
-
   JeomVM.prototype._callByName=async function(name){
     var fn=this.functions[name]||(Object.prototype.hasOwnProperty.call(this.env,name)?this.env[name]:null);
     if(!fn||!fn.args) throw new JeomError('정의되지 않은 함수: \''+name+'\'');
     await this._callFn(fn);
   };
-
   JeomVM.prototype._callFn=async function(fn){
     if(!fn||!fn.args) throw new JeomError('함수 객체 아님');
     this.callDepth++;
@@ -169,7 +565,6 @@ const candidates = [
       this.env=saved; this.callDepth--;
     }
   };
-
   JeomVM.prototype._doImport=async function(){
     var path=String(this._pop());
     if(this.modules[path]){
@@ -192,7 +587,6 @@ const candidates = [
     Object.assign(this.env,sub.env);
     Object.assign(this.functions,sub.functions);
   };
-
   JeomVM.prototype._execInstr=async function(op){
     var a,b,v,n,fn,arr,d,k,i,res,parts,fh,r;
     switch(op){
@@ -370,7 +764,6 @@ const candidates = [
       default: throw new JeomError('알 수 없는 명령: \''+op+'\'');
     }
   };
-
   JeomVM.prototype._truthy=function(v){
     if(v===null||v===undefined) return false;
     if(typeof v==='number') return v!==0;
@@ -399,11 +792,6 @@ const candidates = [
       return '{'+Object.entries(v).map(function(e){return e[0]+': '+self._disp(e[1]);}).join(', ')+'}';
     return String(v);
   };
-
-  // ══════════════════════════════════════════════════════════════
-  // §8  공개 API
-  // ══════════════════════════════════════════════════════════════
-
   return {
     VERSION:VERSION,
     encodeString:encodeString, encodeNumber:encodeNumber, encodeFloat:encodeFloat,
