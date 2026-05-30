@@ -36,6 +36,8 @@ interface Window {
   doDecode: () => void;
   insertEnc: (type: 's' | 'n' | 'f') => void;
   loadEx: (name: string) => void;
+  undoCode: () => void;
+  redoCode: () => void;
 }
 
 (function () {
@@ -44,8 +46,7 @@ interface Window {
   const { encodeString, encodeNumber, encodeFloat, decodeString, decodeNumber,
           tokenize, parse, JeomVM, JeomError, JeomExit, OP_TABLE } = JeomEngine;
 
-  // ── 예제 코드 (빌드 시 engine.js로 생성) ───────────────────────────
-  // encodeString / encodeNumber 을 여기서 직접 호출해 런타임에 생성
+  // ── 예제 코드 ───────────────────────────────────────────────────────────
   function makeExamples(): Record<string, string> {
     const S = encodeString, N = encodeNumber;
     return {
@@ -94,6 +95,43 @@ interface Window {
 
   let inputResolve: ((value: string) => void) | null = null;
   let lastSEnc = '', lastNEnc = '', lastFEnc = '';
+
+  // ── Undo / Redo ──────────────────────────────────────────────────────────
+  const MAX_HISTORY = 200;
+  let history: string[] = [''];
+  let historyIdx = 0;
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  let isUndoRedo = false;
+
+  function pushHistory(value: string) {
+    if (isUndoRedo) return;
+    history = history.slice(0, historyIdx + 1);
+    if (history[historyIdx] === value) return;
+    history.push(value);
+    if (history.length > MAX_HISTORY) history.shift();
+    historyIdx = history.length - 1;
+  }
+
+  function undoCode() {
+    if (historyIdx <= 0) return;
+    historyIdx--;
+    isUndoRedo = true;
+    editor.value = history[historyIdx];
+    isUndoRedo = false;
+    updateLN();
+  }
+
+  function redoCode() {
+    if (historyIdx >= history.length - 1) return;
+    historyIdx++;
+    isUndoRedo = true;
+    editor.value = history[historyIdx];
+    isUndoRedo = false;
+    updateLN();
+  }
+
+  window.undoCode = undoCode;
+  window.redoCode = redoCode;
 
   // ── 상태 표시 ─────────────────────────────────────────────────────────────
   function setStatus(msg: string, type?: 'ok' | 'err' | 'run' | '준비') {
@@ -207,6 +245,7 @@ interface Window {
     r.onload = ev => {
       if (ev.target) {
         editor.value = ev.target.result as string;
+        pushHistory(editor.value);
         updateLN();
       }
     };
@@ -238,12 +277,29 @@ interface Window {
     (document.getElementById('sCol') as HTMLElement).textContent = String(p - before.lastIndexOf('\n'));
   }
 
-  editor.addEventListener('input', updateLN);
+  editor.addEventListener('input', () => {
+    updateLN();
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => pushHistory(editor.value), 300);
+  });
   editor.addEventListener('scroll', () => { lineNums.scrollTop = editor.scrollTop; });
   editor.addEventListener('click', updateCursor);
   editor.addEventListener('keyup', updateCursor);
 
   editor.addEventListener('keydown', (e: KeyboardEvent) => {
+    // Undo: Ctrl+Z / Cmd+Z
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
+      e.preventDefault();
+      if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; pushHistory(editor.value); }
+      undoCode();
+      return;
+    }
+    // Redo: Ctrl+Y / Ctrl+Shift+Z / Cmd+Shift+Z
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) {
+      e.preventDefault();
+      redoCode();
+      return;
+    }
     if (e.key === 'Tab') {
       e.preventDefault();
       const s = editor.selectionStart, end = editor.selectionEnd;
@@ -325,6 +381,7 @@ interface Window {
     editor.value = editor.value.substring(0, s) + tok + editor.value.substring(end);
     editor.selectionStart = editor.selectionEnd = s + tok.length;
     editor.focus(); updateLN();
+    pushHistory(editor.value);
   }
 
   // ── 사이드바 빌드 ─────────────────────────────────────────────────────────
@@ -362,6 +419,7 @@ interface Window {
   // ── 예제 로드 ─────────────────────────────────────────────────────────────
   function loadEx(name: string) {
     editor.value = EXAMPLES[name] || '';
+    pushHistory(editor.value);
     updateLN();
     setStatus('예제 로드됨');
   }
