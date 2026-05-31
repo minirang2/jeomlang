@@ -1,4 +1,3 @@
-/* ide.js — 점(Jeom) 웹 IDE 로직 */
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12,7 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 (function () {
     'use strict';
     const { encodeString, encodeNumber, encodeFloat, decodeString, decodeNumber, tokenize, parse, JeomVM, JeomError, JeomExit, OP_TABLE } = JeomEngine;
-    // ── 예제 코드 ───────────────────────────────────────────────────────────
+    // ── 예제 코드 (빌드 시 engine.js로 생성) ───────────────────────────
+    // encodeString / encodeNumber 을 여기서 직접 호출해 런타임에 생성
     function makeExamples() {
         const S = encodeString, N = encodeNumber;
         return {
@@ -51,43 +51,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     const sTxt = document.getElementById('sTxt');
     let inputResolve = null;
     let lastSEnc = '', lastNEnc = '', lastFEnc = '';
-    // ── Undo / Redo ──────────────────────────────────────────────────────────
-    const MAX_HISTORY = 200;
-    let history = [''];
-    let historyIdx = 0;
-    let debounceTimer = null;
-    let isUndoRedo = false;
-    function pushHistory(value) {
-        if (isUndoRedo)
-            return;
-        history = history.slice(0, historyIdx + 1);
-        if (history[historyIdx] === value)
-            return;
-        history.push(value);
-        if (history.length > MAX_HISTORY)
-            history.shift();
-        historyIdx = history.length - 1;
-    }
-    function undoCode() {
-        if (historyIdx <= 0)
-            return;
-        historyIdx--;
-        isUndoRedo = true;
-        editor.value = history[historyIdx];
-        isUndoRedo = false;
-        updateLN();
-    }
-    function redoCode() {
-        if (historyIdx >= history.length - 1)
-            return;
-        historyIdx++;
-        isUndoRedo = true;
-        editor.value = history[historyIdx];
-        isUndoRedo = false;
-        updateLN();
-    }
-    window.undoCode = undoCode;
-    window.redoCode = redoCode;
     // ── 상태 표시 ─────────────────────────────────────────────────────────────
     function setStatus(msg, type) {
         sDot.className = 's-dot' + (type === 'ok' ? ' ok' : type === 'err' ? ' err' : type === 'run' ? ' run' : '');
@@ -203,7 +166,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         r.onload = ev => {
             if (ev.target) {
                 editor.value = ev.target.result;
-                pushHistory(editor.value);
                 updateLN();
             }
         };
@@ -231,33 +193,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         document.getElementById('sLn').textContent = String(before.split('\n').length);
         document.getElementById('sCol').textContent = String(p - before.lastIndexOf('\n'));
     }
-    editor.addEventListener('input', () => {
-        updateLN();
-        if (debounceTimer)
-            clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => pushHistory(editor.value), 300);
-    });
+    editor.addEventListener('input', updateLN);
     editor.addEventListener('scroll', () => { lineNums.scrollTop = editor.scrollTop; });
     editor.addEventListener('click', updateCursor);
     editor.addEventListener('keyup', updateCursor);
     editor.addEventListener('keydown', (e) => {
-        // Undo: Ctrl+Z / Cmd+Z
-        if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
-            e.preventDefault();
-            if (debounceTimer) {
-                clearTimeout(debounceTimer);
-                debounceTimer = null;
-                pushHistory(editor.value);
-            }
-            undoCode();
-            return;
-        }
-        // Redo: Ctrl+Y / Ctrl+Shift+Z / Cmd+Shift+Z
-        if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) {
-            e.preventDefault();
-            redoCode();
-            return;
-        }
         if (e.key === 'Tab') {
             e.preventDefault();
             const s = editor.selectionStart, end = editor.selectionEnd;
@@ -350,7 +290,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         editor.selectionStart = editor.selectionEnd = s + tok.length;
         editor.focus();
         updateLN();
-        pushHistory(editor.value);
     }
     // ── 사이드바 빌드 ─────────────────────────────────────────────────────────
     function buildSidebar() {
@@ -385,7 +324,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     // ── 예제 로드 ─────────────────────────────────────────────────────────────
     function loadEx(name) {
         editor.value = EXAMPLES[name] || '';
-        pushHistory(editor.value);
         updateLN();
         setStatus('예제 로드됨');
     }
