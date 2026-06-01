@@ -1,3 +1,13 @@
+## v1.6.4 - 2026-06-01
+
+## Updates
+
+- Added undo/redo functionality to the IDE.
+- Added an example code sample.
+- Fixed an issue with the VS Code extension.
+
+---
+
 ## v1.5.4 - 2026-05-29
 
 ## Updates
