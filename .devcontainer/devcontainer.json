@@ -1,0 +1,33 @@
+{
+  "name": "My Codespace",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "christian-kohler.path-intellisense",
+        "dbaeumer.vscode-eslint",
+        "eamodio.gitlens",
+        "esbenp.prettier-vscode",
+        "formulahendry.code-runner",
+        "github.codespaces",
+        "github.github-vscode-theme",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "gruntfuggly.todo-tree",
+        "jock.svg",
+        "ms-ceintl.vscode-language-pack-ko",
+        "ms-python.debugpy",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.vscode-python-envs",
+        "ms-vscode.powershell",
+        "nilssoderman.batch-runner",
+        "oderwat.indent-rainbow",
+        "ritwickdey.liveserver",
+        "shinotatwu-ds.file-tree-generator",
+        "slevesque.vscode-zipexplorer",
+        "usernamehw.errorlens",
+        "yzhang.markdown-all-in-one"
+      ]
+    }
+  }
+}
