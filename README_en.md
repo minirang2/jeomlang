@@ -250,7 +250,8 @@ await vm.run(sourceCode);
 
 ## VS Code Extension
 
-Included in [`tools/vscode-extension/`](tools/vscode-extension/).  
+Included in [`tools/vscode-extension/`](tools/vscode-extension/).<br>
+And also [`https://github.com/captain34643875-wq/JeomLang-VScode`](https://github.com/captain34643875-wq/JeomLang-VScode).<br>
 Provides syntax highlighting, code snippets, and language configuration.
 
 -----
