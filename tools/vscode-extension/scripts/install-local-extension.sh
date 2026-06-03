@@ -4,6 +4,7 @@ set -e
 
 # Default install roots (Linux/macOS/Codespaces)
 INSTALL_ROOTS=(
+  "$HOME/.vscode-server/extensions"
   "$HOME/.vscode/extensions"
   "$HOME/.cursor/extensions"
 )
