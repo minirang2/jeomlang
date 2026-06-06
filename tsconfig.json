@@ -7,6 +7,7 @@
     "strict": false,
     "noImplicitAny": false,
     "skipLibCheck": true,
+    "rootDir": "./ide/src",
     "outDir": "./ide/dist",
     "esModuleInterop": true
   },

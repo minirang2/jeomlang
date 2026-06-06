@@ -26,7 +26,7 @@
 
 ## Overview
 
-**JeomLang (jeomlang)** is an esoteric programming language where all code is written entirely using Unicode “dot” characters.  
+**JeomLang (점랭)** is an esoteric programming language where all code is written entirely using Unicode “dot” characters.  
 Despite being esoteric, it is a complete language featuring **functions · recursion · arrays · dictionaries · error handling · lambdas · higher-order functions · modules**.
 
 A single engine file (`core/engine.js`) powers both the browser-based web IDE and the Node.js CLI.

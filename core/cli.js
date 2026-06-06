@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * cli.js — 점(Jeom) 언어 Node.js CLI
+ * cli.js — 점랭(JeomLang) Node.js CLI
  *
  * 사용법:
  *   node cli.js run <file.jeom>
@@ -239,7 +239,7 @@ function printNode(node, depth) {
 // ── REPL ──────────────────────────────────────────────────────────────────────
 async function cmdRepl() {
     console.log(`
-${bold(cyan('점(Jeom)'))} ${gray(`v${VERSION}`)} REPL
+${bold(cyan('점랭(JeomLang)'))} ${gray(`v${VERSION}`)} REPL
 ${gray('───────────────────────────────────────')}
 ${gray('점 유니코드 문자만으로 프로그래밍하는 난해 언어')}
 
@@ -338,7 +338,7 @@ function cmdNew(filePath) {
         }
     }
     const template =
-        `◘ 점(Jeom) 언어 — Hello World 템플릿
+        `◘ 점랭(JeomLang) 언어 — Hello World 템플릿
 ◘ 파일 확장자: .jeom
 ◘ 점 유니코드 문자만으로 작성합니다
 
@@ -356,7 +356,7 @@ function cmdNew(filePath) {
 
 // ── ops 목록 ──────────────────────────────────────────────────────────────────
 function cmdOps() {
-    console.log(bold('점(Jeom) 전체 명령 토큰'));
+    console.log(bold('점랭(JeomLang) 전체 명령 토큰'));
     console.log(gray('─'.repeat(50)));
     const groups = {};
     for (const [raw, name] of Object.entries(OP_TABLE)) {
@@ -378,7 +378,7 @@ async function main() {
 
     if (!cmd || cmd === '--help' || cmd === '-h') {
         console.log(`
-${bold(cyan('점(Jeom) 언어 CLI'))} ${gray(`v${VERSION}`)}
+${bold(cyan('점랭(JeomLang) 언어 CLI'))} ${gray(`v${VERSION}`)}
 
 ${yellow('사용법:')} node cli.js <명령> [옵션]
 
@@ -493,7 +493,7 @@ ${yellow('예제:')}
             cmdOps();
             break;
         case 'version':
-            console.log(`${bold(cyan('점(Jeom)'))} ${green(`v${VERSION}`)}`);
+            console.log(`${bold(cyan('점랭(JeomLang)'))} ${green(`v${VERSION}`)}`);
             console.log(gray('점 유니코드 문자만으로 프로그래밍하는 난해 언어'));
             console.log(gray(`Node.js ${process.version} · ${process.platform}`));
             break;

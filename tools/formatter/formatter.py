@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-formatter — 점(Jeom) 언어 코드 포맷터
+formatter — 언어 코드 포맷터
 
 JS 엔진(engine.js)으로 파싱 후 Python이 포맷 출력.
 node.js 가 PATH에 있어야 합니다.
@@ -430,7 +430,7 @@ def _info(m): print(_c('·', '36') + ' ' + m)
 def main():
     ap = argparse.ArgumentParser(
         prog='formatter',
-        description='점(Jeom) 언어 코드 포맷터 (JS 엔진으로 파싱)',
+        description='점랭 (JeomLang) 언어 코드 포맷터 (JS 엔진으로 파싱)',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 예제:

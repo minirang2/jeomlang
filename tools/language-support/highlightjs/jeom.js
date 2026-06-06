@@ -1,6 +1,7 @@
 hljs.registerLanguage('jeom', function (hljs) {
   return {
-    name: 'Jeom',
+    name: 'JeomLang',
+    aliases: ['jeomlang'],
     contains: [
       {
         className: 'comment',
