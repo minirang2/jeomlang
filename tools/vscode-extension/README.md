@@ -5,7 +5,7 @@
   &nbsp;&nbsp;
   <a href="COMPATIBILITY.md">🔗 <strong>Compatibility</strong></a>
   &nbsp;&nbsp;
-  <a href="ABSORPTION.md">📦 <strong>공식 리포 흡수</strong></a>
+  <a href="ABSORPTION.md">📦 <strong>공식 리포지토리 흡수</strong></a>
 </p>
 
 VS Code에서 점랭(`.jeom`) 파일을 바로 실행하기 위한 확장 프로젝트입니다.  
