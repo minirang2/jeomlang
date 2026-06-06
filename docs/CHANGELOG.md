@@ -1,3 +1,12 @@
+## v1.7.4 - 2026-06-06
+
+## Updates
+
+- Fixed wrong name of JeomLang.
+- Fixed tsconfig.json
+
+---
+
 ## v1.6.4 - 2026-06-01
 
 ## Updates
