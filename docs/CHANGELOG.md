@@ -1,3 +1,12 @@
+## v1.7.5 - 2026-06-07
+
+## Updates
+
+- Bug fixed on JeomLang vscode extension.
+- Updated README.md.
+
+---
+
 ## v1.7.4 - 2026-06-06
 
 ## Updates
