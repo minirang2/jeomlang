@@ -504,6 +504,7 @@ section {
 }
 
 .feature-card {
+    cursor: default;
     background: var(--surface);
     padding: 32px;
     transition: background 0.2s;
@@ -547,6 +548,7 @@ section {
 }
 
 .char-card {
+    cursor: default;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -765,6 +767,7 @@ section {
 }
 
 .dl-title {
+    cursor: default;
     font-size: 18px;
     font-weight: 600;
     color: #fff;
@@ -772,6 +775,7 @@ section {
 }
 
 .dl-desc {
+    cursor: default;
     font-size: 13px;
     font-weight: 300;
     color: var(--text2);
@@ -1141,6 +1145,7 @@ jeom-version {
     }
 
     .hero-title {
+        cursor: default;
         letter-spacing: -1px;
     }
 }
