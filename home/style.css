@@ -197,6 +197,7 @@ nav {
 }
 
 .hero-title {
+    cursor: default;
     font-family: var(--mono);
     font-size: clamp(48px, 8vw, 96px);
     font-weight: 500;
@@ -1145,7 +1146,6 @@ jeom-version {
     }
 
     .hero-title {
-        cursor: default;
         letter-spacing: -1px;
     }
 }
