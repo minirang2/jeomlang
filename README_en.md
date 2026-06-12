@@ -10,6 +10,7 @@
   <a href="docs/GRAMMAR.md">Grammar Reference</a> ·
   <a href="docs/SPEC.md">Language Specification</a> ·
   <a href="docs/CHANGELOG.md">Changelog</a> · 
+  <a href="https://www.npmjs.com/package/jeomlang">npm package</a> · 
   <a href="README.md">Korean README</a>
 </p>
 
